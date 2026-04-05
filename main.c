@@ -10,38 +10,44 @@
 #define PLAYER_FOV 80
 #define RENDER_DISTANCE 250
 
-#define PLAYER_COLOR GetColor(0x00ff00FF)
+#define COLOR GetColor(0x007777FF)
 
 #define MAP_HEIGHT 5
 #define MAP_WIDTH 5
 
-#define RAY_STEP_SIZE 0.05
+#define RAY_STEP PLAYER_FOV/WIDTH
+#define RAY_STEP_SIZE 0.5
 
 #define SCENE_HEIGHT MAP_HEIGHT*CELL_SIZE
 #define SCENE_WIDTH MAP_WIDTH*CELL_SIZE
 
 //#define VERTICAL_SCALE HEIGHT*50
 #define PLAYER_ROTATION_SPEED 1
-#define PLAYER_MOVEMENT_SPEED 5
-
-int map[MAP_HEIGHT][MAP_WIDTH] = {
-    {0, 0, 0, 1, 0},
-    {0, 0, 1, 1, 0},
-    {1, 0, 0, 1, 1},
-    {1, 0, 0, 0, 1},
-    {1, 1, 1, 0, 1}
-};
+#define PLAYER_MOVEMENT_SPEED 2
 
 typedef struct {
-    double x, y, angle;
+    double x;
+    double y;
+    double angle;
 } Player;
 
+int map[MAP_HEIGHT][MAP_WIDTH] = {
+    {0,0,1,0,0},
+    {1,0,0,0,0},
+    {0,0,0,0,0},
+    {0,0,0,0,0},
+    {0,0,0,0,0}
+};
+
+//               x, y, deg
 Player player = {0, 0, 45};
+
 void DrawPlayer(Player player){
-    DrawRectangle(player.x, player.y, 10, 10, PLAYER_COLOR);
+    DrawRectangle(player.x, player.y, 10, 10, COLOR);
 }
+
 // returns the distance to next wall assuming the player looks in given direction
-double GetDistance(Player player, double angle){
+double GetDistance(double angle){
     //cast a ray
     bool wall_detected = false;
 
@@ -61,11 +67,11 @@ double GetDistance(Player player, double angle){
         int cell_x = ray_x / CELL_SIZE;
         int cell_y = ray_y / CELL_SIZE;
 
-        if(cell_x >= MAP_WIDTH || cell_y >= MAP_HEIGHT)
+        if(cell_x > MAP_WIDTH || cell_x < 0 || cell_y >= MAP_HEIGHT || cell_y < 0)
             return -1;
 
         // is the ray inside the wall
-        if(map[cell_y][cell_x]== 1){
+        if(map[cell_y][cell_x] == 1){
             wall_detected=1;
             return ray_distance;
         } else {
@@ -81,20 +87,18 @@ double GetDistance(Player player, double angle){
 
 //draws a vertical line centered around the horizontal center axis of window
 void DrawVerticalLine(double height, double x){
-    Rectangle vertical_rect = {x, HEIGHT/2.0 - height/2,1,height};
-    DrawRectangleRec(vertical_rect, WHITE);
+    Rectangle vertical_rect = {x, HEIGHT/2.0 - height/2, 1, height};
+    DrawRectangleRec(vertical_rect, COLOR);
 }
 
 void DrawFOV(Player player){
-    // Determine how much angle per pixel on the screen width
-    double ray_step = (double)PLAYER_FOV / WIDTH;
-
     for(int x = 0; x < WIDTH; x++){
         // Calculate the exact angle for this pixel vertical line
-        double angle = (player.angle - PLAYER_FOV/2.0) + (x * ray_step);
+        // start at left side of the screen and scan right
+        double angle = (player.angle - PLAYER_FOV/2.0) + ((float)x * RAY_STEP);
 
         // check distance for every angle in field
-        double distance = GetDistance(player, angle * DEG2RAD);
+        double distance = GetDistance(angle * DEG2RAD);
 
         if (distance > 0) {
 
@@ -137,7 +141,7 @@ int main(void) {
         move();
         BeginDrawing();
             ClearBackground(BLACK);
-            DrawPlayer(player);
+            // DrawPlayer(player);
             DrawFOV(player);
 
         EndDrawing();
