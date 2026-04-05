@@ -1,3 +1,2 @@
 Todo:
-1. collision
-2. fish eye correction
+1. fish eye correction
