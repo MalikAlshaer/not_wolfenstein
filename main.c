@@ -3,8 +3,8 @@
 #include <stdbool.h>
 #include <stdio.h>
 
-#define WIDTH 900
-#define HEIGHT 600
+#define SCREEN_WIDTH 900
+#define SCREEN_HEIGHT 600
 
 #define CELL_SIZE 50
 
@@ -17,7 +17,7 @@
 #define MAP_HEIGHT 10
 #define MAP_WIDTH 10
 
-#define RAY_STEP PLAYER_FOV/WIDTH
+#define RAY_STEP PLAYER_FOV/SCREEN_WIDTH
 #define RAY_STEP_SIZE 0.5
 
 #define SCENE_HEIGHT MAP_HEIGHT*CELL_SIZE
@@ -57,20 +57,22 @@ double GetDistance(Player player, double angle){
     double ray_y = player.y;
     double ray_distance=0;
     while(!wall_detected){
-        double ray_distance=sqrt(pow(ray_x - player.x,2)+pow(ray_y-player.y,2)); // d^2 = x^2 + y^2 
+        double ray_distance=sqrt(pow(ray_x - player.x,2)+pow(ray_y-player.y,2)); // d^2 = x^2 + y^2
         if(ray_distance > RENDER_DISTANCE){
             return -1;
         }
         // which cell is the ray inside now
         int cell_x = ray_x / CELL_SIZE;
         int cell_y = ray_y / CELL_SIZE;
-        if(cell_x >= MAP_WIDTH || cell_y >= MAP_HEIGHT)
+
+        if(cell_x > MAP_WIDTH || cell_x < 0 || cell_y >= MAP_HEIGHT || cell_y < 0)
             return -1;
+
         // is the ray inside the wall
         if(map[cell_y][cell_x]== 1){
             wall_detected=1;
             return ray_distance;
-        }else{
+        } else {
             ray_x += cos(angle)*RAY_STEP_SIZE;
             ray_y += sin(angle)*RAY_STEP_SIZE;
         }
@@ -81,40 +83,40 @@ double GetDistance(Player player, double angle){
 }
 //draws a vertical line centered around the horizontal center axis of window
 void DrawVerticalLine(double height, double x){
-    Rectangle vertical_rect = {x,HEIGHT/2 - height/2,1,height};
-    double y=HEIGHT/2 - height/2;
-    if(vertical_rect.x>250 && y>250){
+    Rectangle vertical_rect = {x, SCREEN_HEIGHT/2.0 - height/2, 1, height};
+    double y = SCREEN_HEIGHT/2.0 - height/2;
+    if(vertical_rect.x > 250 && y > 250){
         DrawRectangleRec(vertical_rect, WHITE);
-    }else{
+    } else {
         DrawRectangleRec(vertical_rect, BLUE);
     }
 }
 void DrawFOV(Player player){
-    for(int x = 0; x < WIDTH; x++){
+    for(int x = 0; x < SCREEN_WIDTH; x++){
         // Calculate the exact angle for this pixel vertical line
         double angle = (player.angle - PLAYER_FOV/2.0) + ((float)x * RAY_STEP);
-        
+
         // check distance for every angle in field
         double distance = GetDistance(player, angle*DEG2RAD);
-        
+
         if (distance > 0) {
-            
+
             double corrected_distance = distance * cos((angle - player.angle) * DEG2RAD);
-            
+
             // based on distance, draw a line of proportional height
             // (HEIGHT * CELL_SIZE) / corrected_distance works well to scale correctly
-            double visual_height = (HEIGHT * CELL_SIZE) / corrected_distance;
-            
+            double visual_height = (SCREEN_HEIGHT * CELL_SIZE) / corrected_distance;
+
             DrawVerticalLine(visual_height, x);
         }
     }
 }
 void move(Player *p){
-    
+
     double temp_angle = p->angle;
     double temp_x = p->x;
     double temp_y = p->y;
-    
+
     if(IsKeyDown(KEY_A)){
         temp_angle -=PLAYER_ROTATION_SPEED;
     }
@@ -132,35 +134,35 @@ void move(Player *p){
     int map_x = temp_x / CELL_SIZE;
     int map_y = temp_y / CELL_SIZE;
 
-    
-    if(map_x >= 0 && map_x < MAP_WIDTH && 
-       map_y >= 0 && map_y < MAP_HEIGHT) 
+
+    if(map_x >= 0 && map_x < MAP_WIDTH &&
+       map_y >= 0 && map_y < MAP_HEIGHT)
     {
-       
+
         if(map[map_y][map_x] == 0) {
             p->x = temp_x;
             p->y = temp_y;
         }
-        
+
     }
 
     p->angle = temp_angle;
 }
-    
+
 int main(void)
 {
-    InitWindow(WIDTH, HEIGHT, "not doom");
-    SetTargetFPS(90); 
-    
-    
-    while (!WindowShouldClose())    
+    InitWindow(SCREEN_WIDTH, SCREEN_HEIGHT, "not doom");
+    SetTargetFPS(90);
+
+
+    while (!WindowShouldClose())
     {
         move(&player);
         BeginDrawing();
             ClearBackground(BLACK);
             DrawPlayer(player);
             DrawFOV(player);
-            
+
         EndDrawing();
     }
 
