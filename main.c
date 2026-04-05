@@ -23,8 +23,8 @@
 #define SCENE_HEIGHT MAP_HEIGHT*CELL_SIZE
 #define SCENE_WIDTH MAP_WIDTH*CELL_SIZE
 
-#define PLAYER_ROTATION_SPEED 3
-#define PLAYER_MOVEMENT_SPEED 10
+#define PLAYER_ROTATION_SPEED 1
+#define PLAYER_MOVEMENT_SPEED 2
 
 typedef struct {
     double x, y, angle;
