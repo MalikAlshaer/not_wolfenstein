@@ -2,41 +2,53 @@
 #include <math.h>
 #include <stdbool.h>
 #include <stdio.h>
+
 #define WIDTH 900
 #define HEIGHT 600
+
 #define CELL_SIZE 50
+
 #define PLAYER_FOV 80
+
 #define RENDER_DISTANCE 500
+
 #define PLAYER_COLOR GetColor(0x00ff00FF)
+
 #define MAP_HEIGHT 10
 #define MAP_WIDTH 10
-#define RAY_STEP_SIZE 0.1
-#define PI 3.14
-#define DEG2RAD PI/180
+
+#define RAY_STEP PLAYER_FOV/WIDTH
+#define RAY_STEP_SIZE 0.5
+
 #define SCENE_HEIGHT MAP_HEIGHT*CELL_SIZE
 #define SCENE_WIDTH MAP_WIDTH*CELL_SIZE
-//#define VERTICAL_SCALE HEIGHT*50
+
 #define PLAYER_ROTATION_SPEED 3
 #define PLAYER_MOVEMENT_SPEED 10
-int map[MAP_HEIGHT][MAP_WIDTH]={
-    {0, 0, 0, 0, 0,0, 0, 0, 1, 0},
-    {0, 0, 0, 0, 0,0, 0, 0, 1, 0},
-    {1, 0, 0, 1, 1,0, 0, 0, 1, 0},
-    {1, 0, 0, 0, 1,0, 0, 0, 1, 0},
-    {1, 0, 0, 0, 0,0, 0, 0, 1, 0},
-    {1, 0, 0, 0, 0,0, 0, 0, 1, 0},
-    {1, 0, 0, 0, 0,0, 0, 0, 1, 0},
-    {1, 0, 0, 0, 0,0, 0, 0, 1, 0},
-    {1, 0, 0, 0, 0,0, 0, 0, 1, 0},
-    {1, 1, 1, 1, 1,0, 0, 1, 1, 0}
-};
+
 typedef struct {
     double x, y, angle;
 }Player;
+
+int map[MAP_HEIGHT][MAP_WIDTH]={
+    {0,0,0,0,0,0,0,0,1,0},
+    {0,0,0,0,0,0,0,0,1,0},
+    {1,0,0,1,1,0,0,0,1,0},
+    {1,0,0,0,1,0,0,0,1,0},
+    {1,0,0,0,0,0,0,0,1,0},
+    {1,0,0,0,0,0,0,0,1,0},
+    {1,0,0,0,0,0,0,0,1,0},
+    {1,0,0,0,0,0,0,0,1,0},
+    {1,0,0,0,0,0,0,0,1,0},
+    {1,1,1,1,1,0,0,1,1,0}
+};
+
 Player player = {0, 0, 45};
+
 void DrawPlayer(Player player){ //DrawRectangle(player.x, player.y, 10, 10, PLAYER_COLOR);
     DrawText(TextFormat("x:%.2f y:%.2f",player.x,player.y),10,10,20,RED);
 }
+
 // returns the distance to next wall assuming the player looks in given direction
 double GetDistance(Player player, double angle){
     //cast a ray
@@ -78,12 +90,9 @@ void DrawVerticalLine(double height, double x){
     }
 }
 void DrawFOV(Player player){
-    // Determine how much angle per pixel on the screen width
-    double ray_step = (double)PLAYER_FOV / WIDTH; 
-    
     for(int x = 0; x < WIDTH; x++){
         // Calculate the exact angle for this pixel vertical line
-        double angle = (player.angle - PLAYER_FOV/2.0) + (x * ray_step);
+        double angle = (player.angle - PLAYER_FOV/2.0) + ((float)x * RAY_STEP);
         
         // check distance for every angle in field
         double distance = GetDistance(player, angle*DEG2RAD);
