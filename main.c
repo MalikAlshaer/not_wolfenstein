@@ -2,162 +2,178 @@
 #include <math.h>
 #include <stdbool.h>
 #include <stdio.h>
+
 #define WIDTH 900
 #define HEIGHT 600
+
 #define CELL_SIZE 50
+
 #define PLAYER_FOV 80
+
 #define RENDER_DISTANCE 500
+
 #define PLAYER_COLOR GetColor(0x00ff00FF)
+
 #define MAP_HEIGHT 10
 #define MAP_WIDTH 10
-#define RAY_STEP_SIZE 0.1
-#define PI 3.14
-#define DEG2RAD PI/180
+
+#define RAY_STEP PLAYER_FOV/WIDTH
+#define RAY_STEP_SIZE 1.0
+
 #define SCENE_HEIGHT MAP_HEIGHT*CELL_SIZE
 #define SCENE_WIDTH MAP_WIDTH*CELL_SIZE
-//#define VERTICAL_SCALE HEIGHT*50
+
 #define PLAYER_ROTATION_SPEED 3
-#define PLAYER_MOVEMENT_SPEED 10
-int map[MAP_HEIGHT][MAP_WIDTH]={
-    {0, 0, 0, 0, 0,0, 0, 0, 1, 0},
-    {0, 0, 0, 0, 0,0, 0, 0, 1, 0},
-    {1, 0, 0, 1, 1,0, 0, 0, 1, 0},
-    {1, 0, 0, 0, 1,0, 0, 0, 1, 0},
-    {1, 0, 0, 0, 0,0, 0, 0, 1, 0},
-    {1, 0, 0, 0, 0,0, 0, 0, 1, 0},
-    {1, 0, 0, 0, 0,0, 0, 0, 1, 0},
-    {1, 0, 0, 0, 0,0, 0, 0, 1, 0},
-    {1, 0, 0, 0, 0,0, 0, 0, 1, 0},
-    {1, 1, 1, 1, 1,0, 0, 1, 1, 0}
+#define PLAYER_MOVEMENT_SPEED 1
+
+int map[MAP_HEIGHT][MAP_WIDTH] = {
+    {0,0,0,0,0,0,0,0,1,0},
+    {0,0,0,0,0,0,0,0,1,0},
+    {1,0,0,1,1,0,0,0,1,0},
+    {1,0,0,0,1,0,0,0,1,0},
+    {1,0,0,0,0,0,0,0,1,0},
+    {1,0,0,0,0,0,0,0,1,0},
+    {1,0,0,0,0,0,0,0,1,0},
+    {1,0,0,0,0,0,0,0,1,0},
+    {1,0,0,0,0,0,0,0,1,0},
+    {1,1,1,1,1,0,0,1,1,0}
 };
+
 typedef struct {
     double x, y, angle;
 }Player;
+
 Player player = {0, 0, 45};
-void DrawPlayer(Player player){ //DrawRectangle(player.x, player.y, 10, 10, PLAYER_COLOR);
-    DrawText(TextFormat("x:%.2f y:%.2f",player.x,player.y),10,10,20,RED);
+
+void DrawCoords(){ //DrawRectangle(player.x, player.y, 10, 10, PLAYER_COLOR);
+    DrawText(TextFormat("x:%.2f y:%.2f", player.x, player.y), 10, 10, 20, RED);
 }
+
 // returns the distance to next wall assuming the player looks in given direction
-double GetDistance(Player player, double angle){
-    //cast a ray
+double GetDistance(double angle) {
     bool wall_detected = false;
+
     double ray_x = player.x;
     double ray_y = player.y;
     double ray_distance=0;
+
+    //cast a ray
     while(!wall_detected){
-        ray_distance=sqrt(pow(ray_x - player.x,2)+pow(ray_y-player.y,2)); // d^2 = x^2 + y^2 
+        ray_distance = sqrt(pow(ray_x - player.x, 2) + pow(ray_y - player.y, 2)); // d^2 = x^2 + y^2
+
         if(ray_distance > RENDER_DISTANCE){
             return -1;
         }
+
         // which cell is the ray inside now
         int cell_x = ray_x / CELL_SIZE;
         int cell_y = ray_y / CELL_SIZE;
-        if(cell_x >= MAP_WIDTH || cell_y >= MAP_HEIGHT)
+
+        if(cell_x < 0 || cell_x >= MAP_WIDTH || cell_y < 0 || cell_y >= MAP_HEIGHT)
             return -1;
+
         // is the ray inside the wall
         if(map[cell_y][cell_x]== 1){
             wall_detected=1;
             return ray_distance;
-        }else{
+
+        } else {
             ray_x += cos(angle)*RAY_STEP_SIZE;
             ray_y += sin(angle)*RAY_STEP_SIZE;
         }
     }
+
     printf("WHAT THE HELL HAPPENED?\n");
     //exit(-1);
     return -1;
 }
+
 //draws a vertical line centered around the horizontal center axis of window
 void DrawVerticalLine(double height, double x){
-    Rectangle vertical_rect = {x,HEIGHT/2 - height/2,1,height};
-    double y=HEIGHT/2 - height/2;
-    if(vertical_rect.x>250 && y>250){
+    Rectangle vertical_rect = {x, HEIGHT/2.0 - height/2, 1, height};
+
+    // what?
+    double y = HEIGHT/2.0 - height/2;
+
+    if(vertical_rect.x > 250 && y > 250){
         DrawRectangleRec(vertical_rect, WHITE);
-    }else{
+    }
+
+    else {
         DrawRectangleRec(vertical_rect, BLUE);
     }
 }
-void DrawFOV(Player player){
-    // Determine how much angle per pixel on the screen width
-    double ray_step = (double)PLAYER_FOV / WIDTH; 
-    
+
+void DrawFOV(){
     for(int x = 0; x < WIDTH; x++){
         // Calculate the exact angle for this pixel vertical line
-        double angle = (player.angle - PLAYER_FOV/2.0) + (x * ray_step);
-        
+        double angle = (player.angle - PLAYER_FOV/2.0) + ((float)x * RAY_STEP);
+
         // check distance for every angle in field
-        double distance = GetDistance(player, angle*DEG2RAD);
-        
+        double distance = GetDistance(angle*DEG2RAD);
+
         if (distance > 0) {
-            
-            double corrected_distance = distance * cos((angle - player.angle) * DEG2RAD);
-            
-            // based on distance, draw a line of proportional height
-            // (HEIGHT * CELL_SIZE) / corrected_distance works well to scale correctly
-            //double visual_height = (HEIGHT * CELL_SIZE) / corrected_distance;
+
+            distance = distance * cos((angle - player.angle) * DEG2RAD);
+
             double visual_height = (HEIGHT * CELL_SIZE) / distance;
             DrawVerticalLine(visual_height, x);
         }
     }
 }
-void move(Player *p){
-    
-    double temp_angle = p->angle;
-    double temp_x = p->x;
-    double temp_y = p->y;
-    
-    if(IsKeyDown(KEY_A)){
-        temp_angle -=PLAYER_ROTATION_SPEED;
-    }
-    if(IsKeyDown(KEY_D)){
-        temp_angle +=PLAYER_ROTATION_SPEED;
-    }
+
+void move(){
+    double temp_x = player.x;
+    double temp_y = player.y;
+
+    if(IsKeyDown(KEY_D)) player.angle += PLAYER_ROTATION_SPEED;
+
+    if(IsKeyDown(KEY_A)) player.angle -= PLAYER_ROTATION_SPEED;
+
     if(IsKeyDown(KEY_W)){
-        temp_x +=cos(player.angle*DEG2RAD)*PLAYER_MOVEMENT_SPEED;
-        temp_y +=sin(player.angle*DEG2RAD)*PLAYER_MOVEMENT_SPEED;
+        temp_x += cos(player.angle * DEG2RAD) * PLAYER_MOVEMENT_SPEED;
+        temp_y += sin(player.angle * DEG2RAD) * PLAYER_MOVEMENT_SPEED;
     }
     if(IsKeyDown(KEY_S)){
-        temp_x -=cos(player.angle*DEG2RAD)*PLAYER_MOVEMENT_SPEED;
-        temp_y -=sin(player.angle*DEG2RAD)*PLAYER_MOVEMENT_SPEED;
+        temp_x -=cos(player.angle * DEG2RAD) * PLAYER_MOVEMENT_SPEED;
+        temp_y -=sin(player.angle * DEG2RAD) * PLAYER_MOVEMENT_SPEED;
     }
+
     int map_x = temp_x / CELL_SIZE;
     int map_y = temp_y / CELL_SIZE;
 
-    
-    if(map_x >= 0 && map_x < MAP_WIDTH && map_y >= 0 && map_y < MAP_HEIGHT) 
-    {
-       
+    // if within map bounds
+    if(map_x >= 0 && map_x < MAP_WIDTH && map_y >= 0 && map_y < MAP_HEIGHT) {
+        // if there is not wall
         if(map[map_y][map_x] == 0) {
-            p->x = temp_x;
-            p->y = temp_y;
+            // commit changes
+            player.x = temp_x;
+            player.y = temp_y;
         }
-        
     }
 
-    p->angle = temp_angle;
+    player.angle = player.angle;
 }
-void crossair(){
-    DrawRectangle(WIDTH/2,HEIGHT/2 + 15,4,10,RED);//assagı
-    DrawRectangle(WIDTH/2,HEIGHT/2 - 19 ,4,10,RED);// yukarı
-    DrawRectangle(WIDTH/2 + 15,HEIGHT/2,10,4,RED);//sag
-    DrawRectangle(WIDTH/2 - 20,HEIGHT/2,10,4,RED);//sol
+void DrawCrossair(){
+    DrawRectangle(WIDTH/2, HEIGHT/2 + 15, 4, 10, RED);//assagı
+    DrawRectangle(WIDTH/2, HEIGHT/2 - 19, 4, 10, RED);// yukarı
+    DrawRectangle(WIDTH/2 + 15, HEIGHT/2, 10, 4, RED);//sag
+    DrawRectangle(WIDTH/2 - 20, HEIGHT/2, 10, 4, RED);//sol
 }
-    
-int main(void)
-{
-    InitWindow(WIDTH, HEIGHT, "not doom");
-    SetTargetFPS(90); 
-    
-    
-    while (!WindowShouldClose())    
-    {
-        move(&player);
+
+int main(void) {
+    InitWindow(WIDTH, HEIGHT, "not_wolfenstein.exe");
+    SetTargetFPS(90);
+
+    while (!WindowShouldClose()) {
         BeginDrawing();
-            
-            ClearBackground(BLACK);
-            DrawPlayer(player);
-            DrawFOV(player);
-            crossair();
+        ClearBackground(BLACK);
+
+        DrawCoords();
+        move();
+        //DrawCrossair();
+        DrawFOV();
+
         EndDrawing();
     }
 
