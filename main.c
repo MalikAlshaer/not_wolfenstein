@@ -95,7 +95,7 @@ void DrawVerticalLine(double height, double x, double distance){
     Rectangle vertical_rect = {x, HEIGHT/2.0 - height/2.0, 1, height};
 
     
-    int intensity = 255 - ((distance / RENDER_DISTANCE) * 255;
+    int intensity = 255 - ((distance / RENDER_DISTANCE) * 255);
     
     
     if (intensity < 0) intensity = 0;
