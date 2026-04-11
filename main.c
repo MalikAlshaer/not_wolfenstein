@@ -26,6 +26,7 @@
 #define PLAYER_ROTATION_SPEED 1
 #define PLAYER_MOVEMENT_SPEED 1
 #define MOUSE_SPEED 0.1
+
 int map[MAP_HEIGHT][MAP_WIDTH] = {
     {0,0,0,1,1,1,1,1,1,0},
     {0,0,0,1,0,0,0,0,1,0},
@@ -47,7 +48,6 @@ Player player = {0, 0, 45};
 
 void DrawCoords(){ //DrawRectangle(player.x, player.y, 10, 10, PLAYER_COLOR);
     DrawText(TextFormat("x:%.2f y:%.2f", player.x, player.y), 10, 10, 20, RED);
-    //DrawText(TextFormat())
 }
 
 // returns the distance to next wall assuming the player looks in given direction
