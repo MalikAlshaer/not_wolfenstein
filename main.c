@@ -171,6 +171,7 @@ void move(){
 int main(void) {
     InitWindow(WIDTH, HEIGHT, "not_wolfenstein.exe");
     SetTargetFPS(90);
+    DisableCursor();
 
     while (!WindowShouldClose()) {
         BeginDrawing();
