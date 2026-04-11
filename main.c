@@ -19,18 +19,19 @@
 
 #define PLAYER_ROTATION_SPEED 1
 #define PLAYER_MOVEMENT_SPEED 1
+#define MOUSE_SPEED 0.1
 
 int map[MAP_HEIGHT][MAP_WIDTH] = {
-    {0,0,0,0,0,0,0,0,1,0},
-    {0,0,0,0,0,0,0,0,1,0},
-    {1,0,0,1,1,0,0,0,1,0},
+    {0,0,0,1,1,1,1,1,1,0},
+    {0,0,0,1,0,0,0,0,1,0},
+    {1,0,0,1,1,0,1,0,1,0},
     {1,0,0,0,1,0,0,0,1,0},
+    {1,0,0,0,1,0,0,0,1,0},
+    {1,0,1,1,1,0,0,0,1,0},
+    {1,0,1,0,0,0,0,0,1,0},
+    {1,0,1,1,1,1,1,0,1,0},
     {1,0,0,0,0,0,0,0,1,0},
-    {1,0,0,0,0,0,0,0,1,0},
-    {1,0,0,0,0,0,0,0,1,0},
-    {1,0,0,0,0,0,0,0,1,0},
-    {1,0,0,0,0,0,0,0,1,0},
-    {1,1,1,1,1,0,0,1,1,0}
+    {1,1,1,1,1,1,1,1,1,0}
 };
 
 typedef struct {
@@ -96,7 +97,7 @@ void DrawVerticalLine(double height, double x){
     // what?
     double y = HEIGHT/2.0 - height/2;
 
-    if(vertical_rect.x > 250 && y > 250){
+    if(vertical_rect.x > 250 && y > 350 && vertical_rect.x < 400 &&y < 600){
         DrawRectangleRec(vertical_rect, WHITE);
     }
 
@@ -125,6 +126,12 @@ void DrawFOV(){
 void move(){
     double temp_x = player.x;
     double temp_y = player.y;
+    float angleX = 0,angleY = 0;
+    Vector2 mouseDelta = GetMouseDelta();
+    angleX -= mouseDelta.y * MOUSE_SPEED;
+    angleY += mouseDelta.x * MOUSE_SPEED;
+    //player.angle += cos(angleY) * 0.1;
+    player.angle += sin(angleY * DEG2RAD) * 50;
 
     if(IsKeyDown(KEY_D)) {
         if(player.angle >= 360) player.angle -= 360;
