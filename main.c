@@ -134,13 +134,13 @@ void move(){
     player.angle += sin(angleY * DEG2RAD) * 50;
 
     if(IsKeyDown(KEY_D)) {
-        if(player.angle >= 360) player.angle -= 360;
-        player.angle += PLAYER_ROTATION_SPEED;
+        temp_y += cos(player.angle * DEG2RAD) * PLAYER_MOVEMENT_SPEED;
+        temp_x -= sin(player.angle * DEG2RAD) * PLAYER_MOVEMENT_SPEED;
     }
 
     if(IsKeyDown(KEY_A)) {
-        if (player.angle >= 360) player.angle -= 360;
-        player.angle -= PLAYER_ROTATION_SPEED;
+        temp_y -= cos(player.angle * DEG2RAD) * PLAYER_MOVEMENT_SPEED;
+        temp_x += sin(player.angle * DEG2RAD) * PLAYER_MOVEMENT_SPEED;
     }
 
     if(IsKeyDown(KEY_W)){
@@ -165,7 +165,7 @@ void move(){
         }
     }
 
-    player.angle = player.angle;
+    //player.angle = player.angle;
 }
 
 int main(void) {
