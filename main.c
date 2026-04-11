@@ -60,7 +60,6 @@ double GetDistance(double angle) {
 
     //cast a ray
     while(!wall_detected){
-        // ray_distance = sqrt(pow(ray_x - player.x, 2) + pow(ray_y - player.y, 2)); // d^2 = x^2 + y^2
         ray_distance += RAY_STEP_SIZE;
 
         if(ray_distance > RENDER_DISTANCE){
