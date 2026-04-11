@@ -1,6 +1,5 @@
 #include "raylib.h"
 #include <math.h>
-#include <stdbool.h>
 #include <stdio.h>
 
 #define WIDTH 900
@@ -12,16 +11,11 @@
 
 #define RENDER_DISTANCE 500
 
-#define PLAYER_COLOR GetColor(0x00ff00FF)
-
 #define MAP_HEIGHT 10
 #define MAP_WIDTH 10
 
 #define RAY_STEP PLAYER_FOV/WIDTH
-#define RAY_STEP_SIZE 1.0
-
-#define SCENE_HEIGHT MAP_HEIGHT*CELL_SIZE
-#define SCENE_WIDTH MAP_WIDTH*CELL_SIZE
+#define RAY_STEP_SIZE 0.7
 
 #define PLAYER_ROTATION_SPEED 1
 #define PLAYER_MOVEMENT_SPEED 1
@@ -43,10 +37,17 @@ typedef struct {
     double x, y, angle;
 }Player;
 
-Player player = {0, 0, 45};
+Player player = {100, 100, 45};
 
-void DrawCoords(){ //DrawRectangle(player.x, player.y, 10, 10, PLAYER_COLOR);
+void DrawHUD(){ //DrawRectangle(player.x, player.y, 10, 10, PLAYER_COLOR);
+    //coords
     DrawText(TextFormat("x:%.2f y:%.2f", player.x, player.y), 10, 10, 20, RED);
+
+    // crosshair
+    DrawRectangle(WIDTH/2, HEIGHT/2 + 15, 4, 10, RED);//assagı
+    DrawRectangle(WIDTH/2, HEIGHT/2 - 19, 4, 10, RED);// yukarı
+    DrawRectangle(WIDTH/2 + 15, HEIGHT/2, 10, 4, RED);//sag
+    DrawRectangle(WIDTH/2 - 20, HEIGHT/2, 10, 4, RED);//sol
 }
 
 // returns the distance to next wall assuming the player looks in given direction
@@ -59,7 +60,8 @@ double GetDistance(double angle) {
 
     //cast a ray
     while(!wall_detected){
-        ray_distance = sqrt(pow(ray_x - player.x, 2) + pow(ray_y - player.y, 2)); // d^2 = x^2 + y^2
+        // ray_distance = sqrt(pow(ray_x - player.x, 2) + pow(ray_y - player.y, 2)); // d^2 = x^2 + y^2
+        ray_distance += RAY_STEP_SIZE;
 
         if(ray_distance > RENDER_DISTANCE){
             return -1;
@@ -107,14 +109,13 @@ void DrawVerticalLine(double height, double x){
 void DrawFOV(){
     for(int x = 0; x < WIDTH; x++){
         // Calculate the exact angle for this pixel vertical line
-        double angle = (player.angle - PLAYER_FOV/2.0) + ((float)x * RAY_STEP);
+        double angle = ((player.angle - PLAYER_FOV/2.0) + ((float)x * RAY_STEP)) * DEG2RAD;
 
         // check distance for every angle in field
-        double distance = GetDistance(angle*DEG2RAD);
+        double distance = GetDistance(angle);
 
         if (distance > 0) {
-
-            distance = distance * cos((angle - player.angle) * DEG2RAD);
+            distance = distance * cos(angle - player.angle * DEG2RAD);
 
             double visual_height = (HEIGHT * CELL_SIZE) / distance;
             DrawVerticalLine(visual_height, x);
@@ -126,9 +127,15 @@ void move(){
     double temp_x = player.x;
     double temp_y = player.y;
 
-    if(IsKeyDown(KEY_D)) player.angle += PLAYER_ROTATION_SPEED;
+    if(IsKeyDown(KEY_D)) {
+        if(player.angle >= 360) player.angle -= 360;
+        player.angle += PLAYER_ROTATION_SPEED;
+    }
 
-    if(IsKeyDown(KEY_A)) player.angle -= PLAYER_ROTATION_SPEED;
+    if(IsKeyDown(KEY_A)) {
+        if (player.angle >= 360) player.angle -= 360;
+        player.angle -= PLAYER_ROTATION_SPEED;
+    }
 
     if(IsKeyDown(KEY_W)){
         temp_x += cos(player.angle * DEG2RAD) * PLAYER_MOVEMENT_SPEED;
@@ -154,12 +161,6 @@ void move(){
 
     player.angle = player.angle;
 }
-void DrawCrossair(){
-    DrawRectangle(WIDTH/2, HEIGHT/2 + 15, 4, 10, RED);//assagı
-    DrawRectangle(WIDTH/2, HEIGHT/2 - 19, 4, 10, RED);// yukarı
-    DrawRectangle(WIDTH/2 + 15, HEIGHT/2, 10, 4, RED);//sag
-    DrawRectangle(WIDTH/2 - 20, HEIGHT/2, 10, 4, RED);//sol
-}
 
 int main(void) {
     InitWindow(WIDTH, HEIGHT, "not_wolfenstein.exe");
@@ -169,10 +170,10 @@ int main(void) {
         BeginDrawing();
         ClearBackground(BLACK);
 
-        DrawCoords();
         move();
-        //DrawCrossair();
         DrawFOV();
+
+        DrawHUD();
 
         EndDrawing();
     }
