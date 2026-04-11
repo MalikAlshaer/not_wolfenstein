@@ -91,19 +91,20 @@ double GetDistance(double angle) {
 }
 
 //draws a vertical line centered around the horizontal center axis of window
-void DrawVerticalLine(double height, double x){
-    Rectangle vertical_rect = {x, HEIGHT/2.0 - height/2, 1, height};
+void DrawVerticalLine(double height, double x, double distance){
+    Rectangle vertical_rect = {x, HEIGHT/2.0 - height/2.0, 1, height};
 
-    // what?
-    double y = HEIGHT/2.0 - height/2;
+    
+    int intensity = 255 - ((distance / RENDER_DISTANCE) * 255;
+    
+    
+    if (intensity < 0) intensity = 0;
+    if (intensity > 255) intensity = 255;
 
-    if(vertical_rect.x > 250 && y > 350 && vertical_rect.x < 400 &&y < 600){
-        DrawRectangleRec(vertical_rect, WHITE);
-    }
+   //you can change {red,green,blue,transparency}
+    Color wallColor = {intensity, intensity, 0, 255};
 
-    else {
-        DrawRectangleRec(vertical_rect, BLUE);
-    }
+    DrawRectangleRec(vertical_rect, wallColor);
 }
 
 void DrawFOV(){
@@ -118,7 +119,7 @@ void DrawFOV(){
             distance = distance * cos(angle - player.angle * DEG2RAD);
 
             double visual_height = (HEIGHT * CELL_SIZE) / distance;
-            DrawVerticalLine(visual_height, x);
+            DrawVerticalLine(visual_height, x, distance);
         }
     }
 }
