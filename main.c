@@ -40,15 +40,18 @@ typedef struct {
 
 Player player = {100, 100, 45};
 
+int paused = 0;
+
 void DrawHUD(){ //DrawRectangle(player.x, player.y, 10, 10, PLAYER_COLOR);
     //coords
-    DrawText(TextFormat("x:%.2f y:%.2f", player.x, player.y), 10, 10, 20, RED);
+    DrawText(TextFormat("x:%.2f y:%.2f", player.x, player.y), 10, 10, 20, BLUE);
 
     // crosshair
     DrawRectangle(WIDTH/2, HEIGHT/2 + 15, 4, 10, RED);//assagı
     DrawRectangle(WIDTH/2, HEIGHT/2 - 19, 4, 10, RED);// yukarı
     DrawRectangle(WIDTH/2 + 15, HEIGHT/2, 10, 4, RED);//sag
     DrawRectangle(WIDTH/2 - 20, HEIGHT/2, 10, 4, RED);//sol
+
 }
 
 // returns the distance to next wall assuming the player looks in given direction
@@ -94,29 +97,26 @@ double GetDistance(double angle) {
 void DrawVerticalLine(double height, double x, double distance){
     Rectangle vertical_rect = {x, HEIGHT/2.0 - height/2.0, 1, height};
 
-    
     int intensity = 255 - ((distance / RENDER_DISTANCE) * 255);
-    
-    
     if (intensity < 0) intensity = 0;
     if (intensity > 255) intensity = 255;
 
-   //you can change {red,green,blue,transparency}
-    Color wallColor = {intensity, intensity, 0, 255};
+   //you can change {red, green, blue, transparency}
+    Color wallColor = {100, 100, 100, intensity};
 
     DrawRectangleRec(vertical_rect, wallColor);
 }
 
 void DrawFOV(){
     for(int x = 0; x < WIDTH; x++){
-        // Calculate the exact angle for this pixel vertical line
-        double angle = ((player.angle - PLAYER_FOV/2.0) + ((float)x * RAY_STEP)) * DEG2RAD;
+        // Calculate the exact angle for this pixel vertical line from left to right
+        double ray_angle = ((player.angle - PLAYER_FOV/2.0) + ((float)x * RAY_STEP)) * DEG2RAD;
 
         // check distance for every angle in field
-        double distance = GetDistance(angle);
+        double distance = GetDistance(ray_angle);
 
         if (distance > 0) {
-            distance = distance * cos(angle - player.angle * DEG2RAD);
+            distance = distance * cos(ray_angle - player.angle * DEG2RAD);
 
             double visual_height = (HEIGHT * CELL_SIZE) / distance;
             DrawVerticalLine(visual_height, x, distance);
@@ -127,7 +127,8 @@ void DrawFOV(){
 void move(){
     double temp_x = player.x;
     double temp_y = player.y;
-    float angleX = 0,angleY = 0;
+    float angleX = 0, angleY = 0;
+
     Vector2 mouseDelta = GetMouseDelta();
     angleX -= mouseDelta.y * MOUSE_SPEED;
     angleY += mouseDelta.x * MOUSE_SPEED;
@@ -148,6 +149,7 @@ void move(){
         temp_x += cos(player.angle * DEG2RAD) * PLAYER_MOVEMENT_SPEED;
         temp_y += sin(player.angle * DEG2RAD) * PLAYER_MOVEMENT_SPEED;
     }
+
     if(IsKeyDown(KEY_S)){
         temp_x -=cos(player.angle * DEG2RAD) * PLAYER_MOVEMENT_SPEED;
         temp_y -=sin(player.angle * DEG2RAD) * PLAYER_MOVEMENT_SPEED;
@@ -165,8 +167,6 @@ void move(){
             player.y = temp_y;
         }
     }
-
-    //player.angle = player.angle;
 }
 
 int main(void) {
@@ -177,12 +177,9 @@ int main(void) {
     while (!WindowShouldClose()) {
         BeginDrawing();
         ClearBackground(BLACK);
-
         move();
         DrawFOV();
-
         DrawHUD();
-
         EndDrawing();
     }
 
