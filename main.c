@@ -20,7 +20,7 @@
 
 #define PLAYER_ROTATION_SPEED 1
 #define PLAYER_MOVEMENT_SPEED 1
-#define MOUSE_SPEED 0.1
+#define MOUSE_SPEED 5
 
 
 int map[MAP_HEIGHT][MAP_WIDTH] = {
@@ -98,53 +98,62 @@ void DrawVerticalLine(double height, double x, double distance){
 }
 
 void DrawFOV(){
+    double ray_angle, distance, visual_height;
     for(int x = 0; x < SCREEN_WIDTH; x++){
         // Calculate the exact angle for this pixel vertical line from left to right
-        double ray_angle = ((player.angle - PLAYER_FOV/2.0) + ((float)x * RAY_STEP)) * DEG2RAD;
+        ray_angle = ((player.angle - PLAYER_FOV/2.0) + ((float)x * RAY_STEP)) * DEG2RAD;
 
         // check distance for every angle in field
-        double distance = GetDistance(ray_angle);
+        distance = GetDistance(ray_angle);
 
         if (distance > 0) {
             distance = distance * cos(ray_angle - player.angle * DEG2RAD);
 
-            double visual_height = (SCREEN_HEIGHT * CELL_SIZE) / distance;
+            // depth of field basically
+            visual_height = (SCREEN_HEIGHT * CELL_SIZE) / distance;
             DrawVerticalLine(visual_height, x, distance);
         }
     }
 }
 
 void move(){
+    // change player location
     double temp_x = player.x;
     double temp_y = player.y;
+    // change camera angle
     float angleX = 0, angleY = 0;
 
     Vector2 mouseDelta = GetMouseDelta();
-    angleX -= mouseDelta.y * MOUSE_SPEED;
-    angleY += mouseDelta.x * MOUSE_SPEED;
-    //player.angle += cos(angleY) * 0.1;
-    player.angle += sin(angleY * DEG2RAD) * 50;
+    angleX -= mouseDelta.y;
+    angleY += mouseDelta.x;
+    // player.angle += cos(angleY) * 0.1;
+    player.angle += sin(angleY * DEG2RAD) * MOUSE_SPEED;
+
+    // trig functions are now variables instead of typing them four times each
+    double c = cos(player.angle * DEG2RAD) * PLAYER_MOVEMENT_SPEED;
+    double s = sin(player.angle * DEG2RAD) * PLAYER_MOVEMENT_SPEED;
 
     if(IsKeyDown(KEY_D)) {
-        temp_y += cos(player.angle * DEG2RAD) * PLAYER_MOVEMENT_SPEED;
-        temp_x -= sin(player.angle * DEG2RAD) * PLAYER_MOVEMENT_SPEED;
+        temp_y += c;
+        temp_x -= s;
     }
 
     if(IsKeyDown(KEY_A)) {
-        temp_y -= cos(player.angle * DEG2RAD) * PLAYER_MOVEMENT_SPEED;
-        temp_x += sin(player.angle * DEG2RAD) * PLAYER_MOVEMENT_SPEED;
+        temp_y -= c;
+        temp_x += s;
     }
 
     if(IsKeyDown(KEY_W)){
-        temp_x += cos(player.angle * DEG2RAD) * PLAYER_MOVEMENT_SPEED;
-        temp_y += sin(player.angle * DEG2RAD) * PLAYER_MOVEMENT_SPEED;
+        temp_x += c;
+        temp_y += s;
     }
 
     if(IsKeyDown(KEY_S)){
-        temp_x -=cos(player.angle * DEG2RAD) * PLAYER_MOVEMENT_SPEED;
-        temp_y -=sin(player.angle * DEG2RAD) * PLAYER_MOVEMENT_SPEED;
+        temp_x -= c;
+        temp_y -= s;
     }
 
+    // convert player coords to map coords
     int map_x = temp_x / CELL_SIZE;
     int map_y = temp_y / CELL_SIZE;
 
@@ -164,10 +173,10 @@ void DrawHUD(){ //DrawRectangle(player.x, player.y, 10, 10, PLAYER_COLOR);
     DrawText(TextFormat("x:%.2f y:%.2f", player.x, player.y), 10, 10, 20, BLUE);
 
     // crosshair
-    DrawRectangle(SCREEN_WIDTH/2, SCREEN_HEIGHT/2 + 15, 4, 10, WHITE);//assagı
-    DrawRectangle(SCREEN_WIDTH/2, SCREEN_HEIGHT/2 - 19, 4, 10, WHITE);// yukarı
-    DrawRectangle(SCREEN_WIDTH/2 + 15, SCREEN_HEIGHT/2, 10, 4, WHITE);//sag
-    DrawRectangle(SCREEN_WIDTH/2 - 20, SCREEN_HEIGHT/2, 10, 4, WHITE);//sol
+    DrawRectangle(SCREEN_WIDTH/2,       SCREEN_HEIGHT/2 + 15,   5,      10,     WHITE);//assagı
+    DrawRectangle(SCREEN_WIDTH/2,       SCREEN_HEIGHT/2 - 20,   5,      10,     WHITE);// yukarı
+    DrawRectangle(SCREEN_WIDTH/2 + 15,  SCREEN_HEIGHT/2,        10,     5,      WHITE);//sag
+    DrawRectangle(SCREEN_WIDTH/2 - 20,  SCREEN_HEIGHT/2,        10,     5,      WHITE);//sol
 }
 
 int main(void) {
