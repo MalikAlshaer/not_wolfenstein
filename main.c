@@ -3,8 +3,8 @@
 #include <stdio.h>
 #include "pause.h"
 
-#define WIDTH 900
-#define HEIGHT 600
+#define SCREEN_WIDTH 900
+#define SCREEN_HEIGHT 600
 
 #define CELL_SIZE 50
 
@@ -15,7 +15,7 @@
 #define MAP_HEIGHT 10
 #define MAP_WIDTH 10
 
-#define RAY_STEP PLAYER_FOV/WIDTH
+#define RAY_STEP PLAYER_FOV/SCREEN_WIDTH
 #define RAY_STEP_SIZE 0.7
 
 #define PLAYER_ROTATION_SPEED 1
@@ -85,7 +85,7 @@ double GetDistance(double angle) {
 
 //draws a vertical line centered around the horizontal center axis of window
 void DrawVerticalLine(double height, double x, double distance){
-    Rectangle vertical_rect = {x, HEIGHT/2.0 - height/2.0, 1, height};
+    Rectangle vertical_rect = {x, SCREEN_HEIGHT/2.0 - height/2.0, 1, height};
 
     int intensity = 255 - ((distance / RENDER_DISTANCE) * 255);
     if (intensity < 0) intensity = 0;
@@ -98,7 +98,7 @@ void DrawVerticalLine(double height, double x, double distance){
 }
 
 void DrawFOV(){
-    for(int x = 0; x < WIDTH; x++){
+    for(int x = 0; x < SCREEN_WIDTH; x++){
         // Calculate the exact angle for this pixel vertical line from left to right
         double ray_angle = ((player.angle - PLAYER_FOV/2.0) + ((float)x * RAY_STEP)) * DEG2RAD;
 
@@ -108,7 +108,7 @@ void DrawFOV(){
         if (distance > 0) {
             distance = distance * cos(ray_angle - player.angle * DEG2RAD);
 
-            double visual_height = (HEIGHT * CELL_SIZE) / distance;
+            double visual_height = (SCREEN_HEIGHT * CELL_SIZE) / distance;
             DrawVerticalLine(visual_height, x, distance);
         }
     }
@@ -164,14 +164,14 @@ void DrawHUD(){ //DrawRectangle(player.x, player.y, 10, 10, PLAYER_COLOR);
     DrawText(TextFormat("x:%.2f y:%.2f", player.x, player.y), 10, 10, 20, BLUE);
 
     // crosshair
-    DrawRectangle(WIDTH/2, HEIGHT/2 + 15, 4, 10, WHITE);//assagı
-    DrawRectangle(WIDTH/2, HEIGHT/2 - 19, 4, 10, WHITE);// yukarı
-    DrawRectangle(WIDTH/2 + 15, HEIGHT/2, 10, 4, WHITE);//sag
-    DrawRectangle(WIDTH/2 - 20, HEIGHT/2, 10, 4, WHITE);//sol
+    DrawRectangle(SCREEN_WIDTH/2, SCREEN_HEIGHT/2 + 15, 4, 10, WHITE);//assagı
+    DrawRectangle(SCREEN_WIDTH/2, SCREEN_HEIGHT/2 - 19, 4, 10, WHITE);// yukarı
+    DrawRectangle(SCREEN_WIDTH/2 + 15, SCREEN_HEIGHT/2, 10, 4, WHITE);//sag
+    DrawRectangle(SCREEN_WIDTH/2 - 20, SCREEN_HEIGHT/2, 10, 4, WHITE);//sol
 }
 
 int main(void) {
-    InitWindow(WIDTH, HEIGHT, "not_wolfenstein.exe");
+    InitWindow(SCREEN_WIDTH, SCREEN_HEIGHT, "not_wolfenstein.exe");
     SetTargetFPS(90);
     DisableCursor();
 
@@ -195,8 +195,9 @@ int main(void) {
         }
 
         else if (paused) {
-            DrawMenu(WIDTH, HEIGHT, pauseT);
+            DrawMenu(SCREEN_WIDTH, SCREEN_HEIGHT, pauseT);
         }
+        // ?\<SCREEN_WIDTH\>
 
         EndDrawing();
     }
