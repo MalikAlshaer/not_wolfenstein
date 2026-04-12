@@ -1,6 +1,7 @@
 #include "raylib.h"
 #include <math.h>
 #include <stdio.h>
+#include "pause.h"
 
 #define WIDTH 900
 #define HEIGHT 600
@@ -177,9 +178,24 @@ int main(void) {
     while (!WindowShouldClose()) {
         BeginDrawing();
         ClearBackground(BLACK);
-        move();
-        DrawFOV();
-        DrawHUD();
+
+        // pause game
+        if (IsKeyPressed(KEY_E)) {
+            paused = (paused + 1) % 2;
+            if (!(paused % 2)) DisableCursor();
+            if (paused % 2) EnableCursor();
+        }
+
+        if (!paused) {
+            move();
+            DrawFOV();
+            DrawHUD();
+        }
+
+        else if (paused) {
+            DrawMenu();
+        }
+
         EndDrawing();
     }
 
