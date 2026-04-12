@@ -197,7 +197,6 @@ int main(void) {
         else if (paused) {
             DrawMenu(SCREEN_WIDTH, SCREEN_HEIGHT, pauseT);
         }
-        // ?\<SCREEN_WIDTH\>
 
         EndDrawing();
     }
