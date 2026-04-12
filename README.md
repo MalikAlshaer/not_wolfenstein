@@ -1,2 +1,3 @@
 Todo:
 1. game adjustments
+2. nevermind fisheye still needs some work
