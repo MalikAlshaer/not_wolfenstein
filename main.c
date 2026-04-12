@@ -47,10 +47,10 @@ void DrawHUD(){ //DrawRectangle(player.x, player.y, 10, 10, PLAYER_COLOR);
     DrawText(TextFormat("x:%.2f y:%.2f", player.x, player.y), 10, 10, 20, BLUE);
 
     // crosshair
-    DrawRectangle(WIDTH/2, HEIGHT/2 + 15, 4, 10, RED);//assagı
-    DrawRectangle(WIDTH/2, HEIGHT/2 - 19, 4, 10, RED);// yukarı
-    DrawRectangle(WIDTH/2 + 15, HEIGHT/2, 10, 4, RED);//sag
-    DrawRectangle(WIDTH/2 - 20, HEIGHT/2, 10, 4, RED);//sol
+    DrawRectangle(WIDTH/2, HEIGHT/2 + 15, 4, 10, WHITE);//assagı
+    DrawRectangle(WIDTH/2, HEIGHT/2 - 19, 4, 10, WHITE);// yukarı
+    DrawRectangle(WIDTH/2 + 15, HEIGHT/2, 10, 4, WHITE);//sag
+    DrawRectangle(WIDTH/2 - 20, HEIGHT/2, 10, 4, WHITE);//sol
 
 }
 
