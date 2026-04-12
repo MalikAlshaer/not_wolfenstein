@@ -1,7 +1,5 @@
 #include "raylib.h"
 
-void DrawMenu() {
-    // DrawText("Paused", 0, 0, 50, RED);
-    DrawText("Paused", 0, 0, 30, BLUE);
-    // ImageDrawPixel(&pic, 10, 10, RAYWHITE);
+void DrawMenu(int width, int height, Texture2D texture) {
+    DrawTexture(texture, width/2 - texture.width/2, height/2 - texture.height/2, RAYWHITE);
 }

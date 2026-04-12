@@ -2,6 +2,6 @@
 #define PAUSE_H_
 #include <raylib.h>
 
-void DrawMenu();
+void DrawMenu(int width, int height, Texture2D texture);
 
 #endif

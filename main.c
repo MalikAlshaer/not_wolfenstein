@@ -22,6 +22,7 @@
 #define PLAYER_MOVEMENT_SPEED 1
 #define MOUSE_SPEED 0.1
 
+
 int map[MAP_HEIGHT][MAP_WIDTH] = {
     {0,0,0,1,1,1,1,1,1,0},
     {0,0,0,1,0,0,0,0,1,0},
@@ -43,21 +44,9 @@ Player player = {100, 100, 45};
 
 int paused = 0;
 
-void DrawHUD(){ //DrawRectangle(player.x, player.y, 10, 10, PLAYER_COLOR);
-    //coords
-    DrawText(TextFormat("x:%.2f y:%.2f", player.x, player.y), 10, 10, 20, BLUE);
-
-    // crosshair
-    DrawRectangle(WIDTH/2, HEIGHT/2 + 15, 4, 10, WHITE);//assagı
-    DrawRectangle(WIDTH/2, HEIGHT/2 - 19, 4, 10, WHITE);// yukarı
-    DrawRectangle(WIDTH/2 + 15, HEIGHT/2, 10, 4, WHITE);//sag
-    DrawRectangle(WIDTH/2 - 20, HEIGHT/2, 10, 4, WHITE);//sol
-
-}
-
 // returns the distance to next wall assuming the player looks in given direction
 double GetDistance(double angle) {
-    bool wall_detected = false;
+    int wall_detected = 0;
 
     double ray_x = player.x;
     double ray_y = player.y;
@@ -170,10 +159,23 @@ void move(){
     }
 }
 
+void DrawHUD(){ //DrawRectangle(player.x, player.y, 10, 10, PLAYER_COLOR);
+    //coords
+    DrawText(TextFormat("x:%.2f y:%.2f", player.x, player.y), 10, 10, 20, BLUE);
+
+    // crosshair
+    DrawRectangle(WIDTH/2, HEIGHT/2 + 15, 4, 10, WHITE);//assagı
+    DrawRectangle(WIDTH/2, HEIGHT/2 - 19, 4, 10, WHITE);// yukarı
+    DrawRectangle(WIDTH/2 + 15, HEIGHT/2, 10, 4, WHITE);//sag
+    DrawRectangle(WIDTH/2 - 20, HEIGHT/2, 10, 4, WHITE);//sol
+}
+
 int main(void) {
     InitWindow(WIDTH, HEIGHT, "not_wolfenstein.exe");
     SetTargetFPS(90);
     DisableCursor();
+
+    Texture2D pauseT = LoadTextureFromImage(LoadImage("textures/tester2.png"));
 
     while (!WindowShouldClose()) {
         BeginDrawing();
@@ -193,7 +195,7 @@ int main(void) {
         }
 
         else if (paused) {
-            DrawMenu();
+            DrawMenu(WIDTH, HEIGHT, pauseT);
         }
 
         EndDrawing();
