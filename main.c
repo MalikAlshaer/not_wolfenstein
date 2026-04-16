@@ -13,7 +13,7 @@
 #define RENDER_DISTANCE 500
 
 #define MAP_HEIGHT 10
-#define MAP_WIDTH 10
+#define MAP_WIDTH 12
 
 #define RAY_STEP PLAYER_FOV/SCREEN_WIDTH
 #define RAY_STEP_SIZE 0.7
@@ -24,18 +24,29 @@
 
 
 int map[MAP_HEIGHT][MAP_WIDTH] = {
-    {0,0,0,1,1,1,1,1,1,0},
-    {0,0,0,1,0,0,0,0,1,0},
-    {1,0,0,1,1,0,1,0,1,0},
-    {1,0,0,0,1,0,0,0,1,0},
-    {1,0,0,0,1,0,0,0,1,0},
-    {1,0,1,1,1,0,0,0,1,0},
-    {1,0,1,0,0,0,0,0,1,0},
-    {1,0,1,1,1,1,1,0,1,0},
-    {1,0,0,0,0,0,0,0,1,0},
-    {1,1,1,1,1,1,1,1,1,0}
+    {1,1,1,1,1,1,1,1,1,1,1,1},
+    {1,0,0,0,0,0,0,0,1,0,0,1},
+    {1,0,0,1,1,0,1,0,1,0,0,1},
+    {1,0,0,0,1,0,0,0,1,0,0,1},
+    {1,0,0,0,1,0,0,0,1,1,1,1},
+    {1,0,1,1,1,0,0,0,1,0,1,1},
+    {1,0,1,0,0,0,0,0,1,0,1,1},
+    {1,0,1,1,1,1,1,0,0,0,1,1},
+    {1,0,0,0,0,0,0,0,1,0,1,1},
+    {1,1,1,1,1,1,1,1,1,1,1,1}
 };
-
+typedef struct Button{
+    Rectangle rect;
+    Color color;
+}Button;
+Button button_0 = {0};
+void init_button(Button *button,Rectangle rect,Color color){
+    button->rect = rect;
+    button->color = color;
+}
+bool is_mouse_over_button(Button button){
+    return CheckCollisionPointRec(GetMousePosition(),button.rect);
+}
 typedef struct {
     double x, y, angle;
 }Player;
@@ -43,7 +54,7 @@ typedef struct {
 Player player = {100, 100, 45};
 
 int paused = 0;
-
+float current_hp=120;
 // returns the distance to next wall assuming the player looks in given direction
 double GetDistance(double angle) {
     int wall_detected = 0;
@@ -82,7 +93,10 @@ double GetDistance(double angle) {
     //exit(-1);
     return -1;
 }
-
+void internal_interface(float current_hp){
+    DrawText(TextFormat("HP"),10,35,20,GREEN);
+    DrawRectangle(45,36,current_hp,15,GREEN); // current_hp=120
+}
 //draws a vertical line centered around the horizontal center axis of window
 void DrawVerticalLine(double height, double x, double distance){
     Rectangle vertical_rect = {x, SCREEN_HEIGHT/2.0 - height/2.0, 1, height};
@@ -92,7 +106,7 @@ void DrawVerticalLine(double height, double x, double distance){
     if (intensity > 255) intensity = 255;
 
    //you can change {red, green, blue, transparency}
-    Color wallColor = {100, 100, 100, intensity};
+    Color wallColor = {intensity, 1, 1, intensity};
 
     DrawRectangleRec(vertical_rect, wallColor);
 }
@@ -164,8 +178,12 @@ void move(){
             // commit changes
             player.x = temp_x;
             player.y = temp_y;
+            if(current_hp<=120) current_hp += 0.2;
+        }else{
+            current_hp -= 0.4;
         }
     }
+    
 }
 
 void DrawHUD(){ //DrawRectangle(player.x, player.y, 10, 10, PLAYER_COLOR);
@@ -181,35 +199,58 @@ void DrawHUD(){ //DrawRectangle(player.x, player.y, 10, 10, PLAYER_COLOR);
 
 int main(void) {
     InitWindow(SCREEN_WIDTH, SCREEN_HEIGHT, "not_wolfenstein.exe");
+    InitAudioDevice();
+    init_button(&button_0,(Rectangle){SCREEN_WIDTH/2 - 45,SCREEN_HEIGHT/2 - 250,90,40},RED);
     SetTargetFPS(90);
     DisableCursor();
-
+    Sound sound_pause = LoadSound("amongsus.wav");
+    Sound sound_game = LoadSound("beppo.wav");
     Texture2D pauseT = LoadTextureFromImage(LoadImage("textures/tester2.png"));
-
+    
     while (!WindowShouldClose()) {
         BeginDrawing();
         ClearBackground(BLACK);
-
+        
         // pause game
         if (IsKeyPressed(KEY_E)) {
             paused = (paused + 1) % 2;
             if (!(paused % 2)) DisableCursor();
             if (paused % 2) EnableCursor();
         }
-
+        
+        if(is_mouse_over_button(button_0) && IsMouseButtonPressed(MOUSE_BUTTON_LEFT)){
+            paused = (paused + 1) % 2;
+            if (!(paused % 2)) DisableCursor();
+            if (paused % 2) EnableCursor();
+        }
         if (!paused) {
+            
             move();
             DrawFOV();
             DrawHUD();
+            internal_interface(current_hp);
+            DrawFPS(SCREEN_WIDTH-90,15);
+            DrawText("to pause press E",SCREEN_WIDTH/2-87,20,20,WHITE);
+            PlaySound(sound_pause);
+           
         }
-
+        
         else if (paused) {
             DrawMenu(SCREEN_WIDTH, SCREEN_HEIGHT, pauseT);
+            if(is_mouse_over_button(button_0)){
+                button_0.color = BLUE;
+            }else{
+                button_0.color = RED;
+            }
+            DrawRectangleRec(button_0.rect,button_0.color);
+            DrawText("Continue",button_0.rect.x + button_0.rect.width / 2 - MeasureText("Continue",20)/2,button_0.rect.y + button_0.rect.height / 2 -20/2,20,WHITE);          
+            PlaySound(sound_game);
         }
-
+        
         EndDrawing();
     }
-
+    UnloadSound(sound_pause);
+    CloseAudioDevice();
     CloseWindow();
     return 0;
 }
