@@ -287,7 +287,11 @@ int main(void) {
             DrawRectangleRec(volume_increase.rect,volume_increase.color);
             DrawRectangleRec(volume_decrease.rect,volume_decrease.color);
             DrawText("Continue",button_0.rect.x + button_0.rect.width / 2 - MeasureText("Continue",20)/2,button_0.rect.y + button_0.rect.height / 2 -20/2,20,WHITE);          
-            DrawText("Pause Music",to_pause_music.rect.x + to_pause_music.rect.width / 2 - MeasureText("Pause Music",20)/2,to_pause_music.rect.y + to_pause_music.rect.height / 2 -20/2,20,WHITE);
+            if(musicbool){
+                DrawText("Pause Music",to_pause_music.rect.x + to_pause_music.rect.width / 2 - MeasureText("Pause Music",20)/2,to_pause_music.rect.y + to_pause_music.rect.height / 2 -20/2,20,WHITE);
+            }else{
+                DrawText("Res Music",to_pause_music.rect.x + to_pause_music.rect.width / 2 - MeasureText("Res Music",20)/2,to_pause_music.rect.y + to_pause_music.rect.height / 2 -20/2,20,WHITE);
+            }
             
             DrawText("+",SCREEN_WIDTH/2 + 102,SCREEN_HEIGHT/2 - 294,30,WHITE);
             DrawText("-",SCREEN_WIDTH/2 - 87,SCREEN_HEIGHT/2 - 294,30,WHITE);
