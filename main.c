@@ -3,8 +3,8 @@
 #include <stdio.h>
 #include "pause.h"
 
-#define SCREEN_WIDTH 900
-#define SCREEN_HEIGHT 600
+#define SCREEN_WIDTH 1200
+#define SCREEN_HEIGHT 800
 
 #define CELL_SIZE 50
 
@@ -25,21 +25,24 @@
 
 int map[MAP_HEIGHT][MAP_WIDTH] = {
     {1,1,1,1,1,1,1,1,1,1,1,1},
-    {1,0,0,0,0,0,0,0,1,0,0,1},
+    {1,0,0,0,0,0,0,0,0,0,0,1},
     {1,0,0,1,1,0,1,0,1,0,0,1},
     {1,0,0,0,1,0,0,0,1,0,0,1},
-    {1,0,0,0,1,0,0,0,1,1,1,1},
-    {1,0,1,1,1,0,0,0,1,0,1,1},
-    {1,0,1,0,0,0,0,0,1,0,1,1},
-    {1,0,1,1,1,1,1,0,0,0,1,1},
-    {1,0,0,0,0,0,0,0,1,0,1,1},
+    {1,0,0,0,1,0,0,0,1,1,0,1},
+    {1,0,1,1,1,0,0,0,1,0,0,1},
+    {1,0,1,0,0,0,0,0,1,0,0,1},
+    {1,0,1,1,1,1,1,0,0,0,0,1},
+    {1,0,0,0,0,0,0,0,1,0,0,1},
     {1,1,1,1,1,1,1,1,1,1,1,1}
 };
 typedef struct Button{
     Rectangle rect;
     Color color;
 }Button;
-Button button_0 = {0};
+Button button_0 = {0}; //continue butonu
+Button to_pause_music = {0}; // sesi durdurma devam ettirme
+Button volume_increase = {0}; // sesi arttırma
+Button volume_decrease = {0}; // sesi azaltma
 void init_button(Button *button,Rectangle rect,Color color){
     button->rect = rect;
     button->color = color;
@@ -52,7 +55,7 @@ typedef struct {
 }Player;
 
 Player player = {100, 100, 45};
-
+int musicbool=0;
 int paused = 0;
 float current_hp=120;
 // returns the distance to next wall assuming the player looks in given direction
@@ -95,7 +98,16 @@ double GetDistance(double angle) {
 }
 void internal_interface(float current_hp){
     DrawText(TextFormat("HP"),10,35,20,GREEN);
-    DrawRectangle(45,36,current_hp,15,GREEN); // current_hp=120
+    DrawRectangle(45,36,current_hp,15,GREEN); // current_hp=120 initial
+    DrawText("to pause press E",SCREEN_WIDTH/2-87,20,20,WHITE);
+    //coords
+    DrawText(TextFormat("x:%.2f y:%.2f", player.x, player.y), 10, 10, 20, BLUE);
+
+    // crosshair
+    DrawRectangle(SCREEN_WIDTH/2,       SCREEN_HEIGHT/2 + 15,   5,      10,     WHITE);//assagı
+    DrawRectangle(SCREEN_WIDTH/2,       SCREEN_HEIGHT/2 - 20,   5,      10,     WHITE);// yukarı
+    DrawRectangle(SCREEN_WIDTH/2 + 15,  SCREEN_HEIGHT/2,        10,     5,      WHITE);//sag
+    DrawRectangle(SCREEN_WIDTH/2 - 20,  SCREEN_HEIGHT/2,        10,     5,      WHITE);//sol
 }
 //draws a vertical line centered around the horizontal center axis of window
 void DrawVerticalLine(double height, double x, double distance){
@@ -185,32 +197,37 @@ void move(){
     }
     
 }
-
-void DrawHUD(){ //DrawRectangle(player.x, player.y, 10, 10, PLAYER_COLOR);
-    //coords
-    DrawText(TextFormat("x:%.2f y:%.2f", player.x, player.y), 10, 10, 20, BLUE);
-
-    // crosshair
-    DrawRectangle(SCREEN_WIDTH/2,       SCREEN_HEIGHT/2 + 15,   5,      10,     WHITE);//assagı
-    DrawRectangle(SCREEN_WIDTH/2,       SCREEN_HEIGHT/2 - 20,   5,      10,     WHITE);// yukarı
-    DrawRectangle(SCREEN_WIDTH/2 + 15,  SCREEN_HEIGHT/2,        10,     5,      WHITE);//sag
-    DrawRectangle(SCREEN_WIDTH/2 - 20,  SCREEN_HEIGHT/2,        10,     5,      WHITE);//sol
+void togglemusic(int musicbool,Music *m){
+    if(musicbool){
+        ResumeMusicStream(*m);
+    }else{
+        PauseMusicStream(*m);
+    }
 }
 
+
 int main(void) {
+    float inc=0.5;// to set the music volume (parameter)
     InitWindow(SCREEN_WIDTH, SCREEN_HEIGHT, "not_wolfenstein.exe");
     InitAudioDevice();
-    init_button(&button_0,(Rectangle){SCREEN_WIDTH/2 - 45,SCREEN_HEIGHT/2 - 250,90,40},RED);
+    init_button(&button_0,(Rectangle){SCREEN_WIDTH/2 - 50,SCREEN_HEIGHT/2 - 250,130,40},RED);
+    init_button(&to_pause_music,(Rectangle){SCREEN_WIDTH/2 - 50,SCREEN_HEIGHT/2 - 300,130,40},GREEN);
+    init_button(&volume_increase,(Rectangle){SCREEN_WIDTH/2 + 92,SCREEN_HEIGHT/2 - 298,37,37},RED);
+    init_button(&volume_decrease,(Rectangle){SCREEN_WIDTH/2 - 100,SCREEN_HEIGHT/2 - 298,37,37},RED);
     SetTargetFPS(90);
     DisableCursor();
-    Sound sound_pause = LoadSound("amongsus.wav");
-    Sound sound_game = LoadSound("beppo.wav");
+    Music music_pause = LoadMusicStream("amongsus.wav");
+    Music music_game = LoadMusicStream("beppo.wav");
     Texture2D pauseT = LoadTextureFromImage(LoadImage("textures/tester2.png"));
-    
+    PlayMusicStream(music_game);
+    PlayMusicStream(music_pause);
+    PauseMusicStream(music_pause);
+    PauseMusicStream(music_game);
     while (!WindowShouldClose()) {
         BeginDrawing();
         ClearBackground(BLACK);
-        
+        UpdateMusicStream(music_game);
+        UpdateMusicStream(music_pause);
         // pause game
         if (IsKeyPressed(KEY_E)) {
             paused = (paused + 1) % 2;
@@ -223,16 +240,24 @@ int main(void) {
             if (!(paused % 2)) DisableCursor();
             if (paused % 2) EnableCursor();
         }
+        if(is_mouse_over_button(to_pause_music) && IsMouseButtonPressed(MOUSE_BUTTON_LEFT)){
+            musicbool = (musicbool + 1) % 2;
+            togglemusic(musicbool,&music_game);
+        }
+        if(is_mouse_over_button(volume_increase) && IsMouseButtonPressed(MOUSE_BUTTON_LEFT)){
+            if(inc<1) inc+=0.1;
+            SetMusicVolume(music_game,inc);
+        }
+        if(is_mouse_over_button(volume_decrease) && IsMouseButtonPressed(MOUSE_BUTTON_LEFT)){
+            if(inc>=0.1) inc-=0.1;
+            SetMusicVolume(music_game,inc);
+        }
         if (!paused) {
             
             move();
             DrawFOV();
-            DrawHUD();
             internal_interface(current_hp);
-            DrawFPS(SCREEN_WIDTH-90,15);
-            DrawText("to pause press E",SCREEN_WIDTH/2-87,20,20,WHITE);
-            PlaySound(sound_pause);
-           
+            DrawFPS(SCREEN_WIDTH-90,15);          
         }
         
         else if (paused) {
@@ -242,14 +267,36 @@ int main(void) {
             }else{
                 button_0.color = RED;
             }
+            if(is_mouse_over_button(to_pause_music)){
+                to_pause_music.color = BLUE;
+            }else{
+                to_pause_music.color = RED;
+            }
+            if(is_mouse_over_button(volume_increase)){
+                volume_increase.color = SKYBLUE;
+            }else{
+                volume_increase.color = RED;
+            }
+            if(is_mouse_over_button(volume_decrease)){
+               volume_decrease.color = SKYBLUE;
+            }else{
+                volume_decrease.color = RED;
+            }
             DrawRectangleRec(button_0.rect,button_0.color);
+            DrawRectangleRec(to_pause_music.rect,to_pause_music.color);
+            DrawRectangleRec(volume_increase.rect,volume_increase.color);
+            DrawRectangleRec(volume_decrease.rect,volume_decrease.color);
             DrawText("Continue",button_0.rect.x + button_0.rect.width / 2 - MeasureText("Continue",20)/2,button_0.rect.y + button_0.rect.height / 2 -20/2,20,WHITE);          
-            PlaySound(sound_game);
+            DrawText("Pause Music",to_pause_music.rect.x + to_pause_music.rect.width / 2 - MeasureText("Pause Music",20)/2,to_pause_music.rect.y + to_pause_music.rect.height / 2 -20/2,20,WHITE);
+            
+            DrawText("+",SCREEN_WIDTH/2 + 102,SCREEN_HEIGHT/2 - 294,30,WHITE);
+            DrawText("-",SCREEN_WIDTH/2 - 87,SCREEN_HEIGHT/2 - 294,30,WHITE);
         }
         
         EndDrawing();
     }
-    UnloadSound(sound_pause);
+    UnloadMusicStream(music_pause);
+    UnloadMusicStream(music_game);
     CloseAudioDevice();
     CloseWindow();
     return 0;
