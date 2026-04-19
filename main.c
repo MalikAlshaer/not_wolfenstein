@@ -215,10 +215,10 @@ int main(void) {
     float inc=0.5;// to set the music volume (parameter)
     InitWindow(SCREEN_WIDTH, SCREEN_HEIGHT, "not_wolfenstein.exe");
     InitAudioDevice();
-    init_button(&button_0,(Rectangle){SCREEN_WIDTH/2 - 50,SCREEN_HEIGHT/2 - 250,130,40},RED);
-    init_button(&to_pause_music,(Rectangle){SCREEN_WIDTH/2 - 50,SCREEN_HEIGHT/2 - 300,130,40},GREEN);
-    init_button(&volume_increase,(Rectangle){SCREEN_WIDTH/2 + 92,SCREEN_HEIGHT/2 - 298,37,37},RED);
-    init_button(&volume_decrease,(Rectangle){SCREEN_WIDTH/2 - 100,SCREEN_HEIGHT/2 - 298,37,37},RED);
+    init_button(&button_0,(Rectangle){SCREEN_WIDTH/2 - 50,SCREEN_HEIGHT/2 - 50,130,40},RED);
+    init_button(&to_pause_music,(Rectangle){SCREEN_WIDTH/2 - 50,SCREEN_HEIGHT/2 - 100,130,40},GREEN);
+    init_button(&volume_increase,(Rectangle){SCREEN_WIDTH/2 + 92,SCREEN_HEIGHT/2 - 98,37,37},RED);
+    init_button(&volume_decrease,(Rectangle){SCREEN_WIDTH/2 - 100,SCREEN_HEIGHT/2 - 98,37,37},RED);
     SetTargetFPS(90);
     DisableCursor();
     Sound sound_pause = LoadSound("amongsus.wav");
@@ -302,12 +302,13 @@ int main(void) {
                 DrawText("Res Music",to_pause_music.rect.x + to_pause_music.rect.width / 2 - MeasureText("Res Music",20)/2,to_pause_music.rect.y + to_pause_music.rect.height / 2 -20/2,20,WHITE);
             }
             
-            DrawText("+",SCREEN_WIDTH/2 + 102,SCREEN_HEIGHT/2 - 294,30,WHITE);
-            DrawText("-",SCREEN_WIDTH/2 - 87,SCREEN_HEIGHT/2 - 294,30,WHITE);
+            DrawText("+",SCREEN_WIDTH/2 + 102,SCREEN_HEIGHT/2 - 95,30,WHITE);
+            DrawText("-",SCREEN_WIDTH/2 - 87,SCREEN_HEIGHT/2 - 95,30,WHITE);
         }
         
         EndDrawing();
     }
+    UnloadTexture(pauseT);
     //UnloadMusicStream(music_pause);
     UnloadSound(sound_pause);
     UnloadMusicStream(music_game);
