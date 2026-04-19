@@ -118,7 +118,7 @@ void DrawVerticalLine(double height, double x, double distance){
     if (intensity > 255) intensity = 255;
 
    //you can change {red, green, blue, transparency}
-    Color wallColor = {intensity, 1, 1, intensity};
+    Color wallColor = {intensity, 67, 67, intensity};
 
     DrawRectangleRec(vertical_rect, wallColor);
 }
@@ -170,8 +170,13 @@ void move(){
     }
 
     if(IsKeyDown(KEY_W)){
-        temp_x += c;
-        temp_y += s;
+        if(IsKeyDown(KEY_LEFT_CONTROL)){
+            temp_x += c*1.8;
+            temp_y += s*1.8;
+        }else{
+            temp_x += c;
+            temp_y += s;
+        }
     }
 
     if(IsKeyDown(KEY_S)){
@@ -216,23 +221,26 @@ int main(void) {
     init_button(&volume_decrease,(Rectangle){SCREEN_WIDTH/2 - 100,SCREEN_HEIGHT/2 - 298,37,37},RED);
     SetTargetFPS(90);
     DisableCursor();
-    Music music_pause = LoadMusicStream("amongsus.wav");
+    Sound sound_pause = LoadSound("amongsus.wav");
     Music music_game = LoadMusicStream("beppo.wav");
-    Texture2D pauseT = LoadTextureFromImage(LoadImage("textures/tester2.png"));
+    Texture2D pauseT = LoadTextureFromImage(LoadImage("textures/space.png"));
     PlayMusicStream(music_game);
-    PlayMusicStream(music_pause);
-    PauseMusicStream(music_pause);
+    //PlayMusicStream(music_pause);
+    //PauseMusicStream(music_pause);
     PauseMusicStream(music_game);
+    
     while (!WindowShouldClose()) {
         BeginDrawing();
-        ClearBackground(BLACK);
+        ClearBackground(DARKGRAY);
         UpdateMusicStream(music_game);
-        UpdateMusicStream(music_pause);
+        //UpdateMusicStream(music_pause);
         // pause game
+        
         if (IsKeyPressed(KEY_E)) {
             paused = (paused + 1) % 2;
             if (!(paused % 2)) DisableCursor();
             if (paused % 2) EnableCursor();
+            
         }
         
         if(is_mouse_over_button(button_0) && IsMouseButtonPressed(MOUSE_BUTTON_LEFT)){
@@ -257,7 +265,8 @@ int main(void) {
             move();
             DrawFOV();
             internal_interface(current_hp);
-            DrawFPS(SCREEN_WIDTH-90,15);          
+            DrawFPS(SCREEN_WIDTH-90,15);   
+            
         }
         
         else if (paused) {
@@ -299,7 +308,8 @@ int main(void) {
         
         EndDrawing();
     }
-    UnloadMusicStream(music_pause);
+    //UnloadMusicStream(music_pause);
+    UnloadSound(sound_pause);
     UnloadMusicStream(music_game);
     CloseAudioDevice();
     CloseWindow();
