@@ -112,6 +112,12 @@ void internal_interface(float current_hp){
     DrawRectangle(SCREEN_WIDTH/2,       SCREEN_HEIGHT/2 - 20,   5,      10,     WHITE);// yukarı
     DrawRectangle(SCREEN_WIDTH/2 + 15,  SCREEN_HEIGHT/2,        10,     5,      WHITE);//sag
     DrawRectangle(SCREEN_WIDTH/2 - 20,  SCREEN_HEIGHT/2,        10,     5,      WHITE);//sol
+    //minimap
+    float mini_point_x = player.x/50 * 12 + SCREEN_WIDTH - 152;
+    float mini_point_y = player.y/50 * 11;
+    DrawRectangle(SCREEN_WIDTH - 140,50,130,95,WHITE); //map background
+    DrawRectangle(mini_point_x,mini_point_y + 38,10,10,BLUE);
+    DrawText("mini map",SCREEN_WIDTH - 122,145,25,WHITE);
 }
 //draws a vertical line centered around the horizontal center axis of window
 void DrawVerticalLine(double height, double x, double distance){
