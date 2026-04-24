@@ -1,10 +1,9 @@
-#include "raylib.h"
-#include <math.h>
 #include <stdio.h>
-#include "pause.h"
+#include <math.h>
 
-#define SCREEN_WIDTH 1200
-#define SCREEN_HEIGHT 800
+#include "raylib.h"
+#include "config.h"
+#include "interface.h"
 
 #define CELL_SIZE 50
 
@@ -20,9 +19,10 @@
 
 #define PLAYER_ROTATION_SPEED 1
 #define PLAYER_MOVEMENT_SPEED 1
-//#define MOUSE_SPEED 5
 
+// change this into a macro and make changing the speed change a variable that is subtracted from the definition
 int MOUSE_SPEED=5;
+
 int map[MAP_HEIGHT][MAP_WIDTH] = {
     {1,1,1,1,1,1,1,1,1,1,1,1},
     {1,0,0,0,0,0,0,0,0,0,0,1},
@@ -33,34 +33,19 @@ int map[MAP_HEIGHT][MAP_WIDTH] = {
     {1,0,1,0,0,0,0,0,1,0,0,1},
     {1,0,1,1,1,1,1,0,0,0,0,1},
     {1,0,0,0,0,0,0,0,1,0,0,1},
-    {1,1,1,1,1,1,1,1,1,1,1,1}
+    {1,1,1,1,1,1,1,1,1,1,1,1},
 };
-typedef struct Button{
-    Rectangle rect;
-    Color color;
-}Button;
-Button button_0 = {0}; //continue butonu
-Button to_pause_music = {0}; // sesi durdurma devam ettirme
-Button volume_increase = {0}; // sesi arttırma
-Button volume_decrease = {0}; // sesi azaltma
-Button sens = {0};
-Button sens_inc = {0};
-Button sens_dec = {0};
-void init_button(Button *button,Rectangle rect,Color color){
-    button->rect = rect;
-    button->color = color;
-}
-bool is_mouse_over_button(Button button){
-    return CheckCollisionPointRec(GetMousePosition(),button.rect);
-}
-typedef struct {
-    double x, y, angle;
-}Player;
 
-Player player = {100, 100, 45};
-int musicbool=0;
-int paused = 0;
-float current_hp=120;
+typedef struct Player {
+    double x;
+    double y;
+    double angle;
+    int hp;
+} Player;
+
+Player player = {100, 100, 45, 120};
+
+
 // returns the distance to next wall assuming the player looks in given direction
 double GetDistance(double angle) {
     int wall_detected = 0;
@@ -99,11 +84,18 @@ double GetDistance(double angle) {
     //exit(-1);
     return -1;
 }
-void internal_interface(float current_hp){
+
+void DrawHud(){
+    // fps
+    DrawFPS(SCREEN_WIDTH - 90, 15);
+
+    // hp
     DrawText(TextFormat("HP"),10,35,20,GREEN);
-    DrawRectangle(45,36,current_hp,15,GREEN); // current_hp=120 initial
-    DrawText("to pause press E",SCREEN_WIDTH/2-87,20,20,WHITE);
-    DrawText("to sprint keep ctrl",SCREEN_WIDTH/2-95,49,20,WHITE);
+    DrawRectangle(45, 36, player.hp, 15, GREEN); // current_hp=120 initial
+
+    // DrawText("to pause press E",SCREEN_WIDTH/2-87,20,20,WHITE);
+    // DrawText("to sprint keep ctrl",SCREEN_WIDTH/2-95,49,20,WHITE);
+
     //coords
     DrawText(TextFormat("x:%.2f y:%.2f", player.x, player.y), 10, 10, 20, BLUE);
 
@@ -112,6 +104,7 @@ void internal_interface(float current_hp){
     DrawRectangle(SCREEN_WIDTH/2,       SCREEN_HEIGHT/2 - 20,   5,      10,     WHITE);// yukarı
     DrawRectangle(SCREEN_WIDTH/2 + 15,  SCREEN_HEIGHT/2,        10,     5,      WHITE);//sag
     DrawRectangle(SCREEN_WIDTH/2 - 20,  SCREEN_HEIGHT/2,        10,     5,      WHITE);//sol
+
     //minimap
     float mini_point_x = player.x/50 * 12 + SCREEN_WIDTH - 152;
     float mini_point_y = player.y/50 * 11;
@@ -119,6 +112,7 @@ void internal_interface(float current_hp){
     DrawRectangle(mini_point_x,mini_point_y + 38,10,10,BLUE);
     DrawText("mini map",SCREEN_WIDTH - 122,145,25,WHITE);
 }
+
 //draws a vertical line centered around the horizontal center axis of window
 void DrawVerticalLine(double height, double x, double distance){
     Rectangle vertical_rect = {x, SCREEN_HEIGHT/2.0 - height/2.0, 1, height};
@@ -128,7 +122,7 @@ void DrawVerticalLine(double height, double x, double distance){
     if (intensity > 255) intensity = 255;
 
    //you can change {red, green, blue, transparency}
-    Color wallColor = {intensity, 40,40, intensity};
+    Color wallColor = {0, 255, 0, intensity};
 
     DrawRectangleRec(vertical_rect, wallColor);
 }
@@ -205,154 +199,163 @@ void move(){
             // commit changes
             player.x = temp_x;
             player.y = temp_y;
-            if(current_hp<=120) current_hp += 0.2;
+            if(player.hp <= 120) player.hp += 0.2;
         }else{
-            current_hp -= 0.4;
+            player.hp -= 0.4;
         }
-    }
-    
-}
-void togglemusic(int musicbool,Music *m){
-    if(musicbool){
-        ResumeMusicStream(*m);
-    }else{
-        PauseMusicStream(*m);
     }
 }
 
+void ToggleMusic(int music_bool, Music *music){
+    if (music_bool) { ResumeMusicStream(*music); }
+    else { PauseMusicStream(*music); }
+}
 
 int main(void) {
-    float inc=0.5;// to set the music volume (parameter)
+    SetTargetFPS(FPS);
     InitWindow(SCREEN_WIDTH, SCREEN_HEIGHT, "not_wolfenstein.exe");
-    InitAudioDevice();
-    init_button(&button_0,(Rectangle){SCREEN_WIDTH/2 - 50,SCREEN_HEIGHT/2 - 50,130,40},RED);
-    init_button(&to_pause_music,(Rectangle){SCREEN_WIDTH/2 - 50,SCREEN_HEIGHT/2 - 100,130,40},GREEN);
-    init_button(&volume_increase,(Rectangle){SCREEN_WIDTH/2 + 92,SCREEN_HEIGHT/2 - 98,37,37},RED);
-    init_button(&volume_decrease,(Rectangle){SCREEN_WIDTH/2 - 100,SCREEN_HEIGHT/2 - 98,37,37},RED);
-    init_button(&sens,(Rectangle){SCREEN_WIDTH/2 - 50,SCREEN_HEIGHT/2 - 150,130,40},RED);
-    init_button(&sens_inc,(Rectangle){SCREEN_WIDTH/2 + 92,SCREEN_HEIGHT/2 - 148,37,37},RED);
-    init_button(&sens_dec,(Rectangle){SCREEN_WIDTH/2 - 100,SCREEN_HEIGHT/2 - 148,37,37},RED);
-    SetTargetFPS(90);
+    InitButtons(); // visual stuff from our interface library
+    InitAudioDevice(); // hardware (from raylib)
+    InitAudio(); // volume and stuff (also from interface library)
     DisableCursor();
-    Sound sound_pause = LoadSound("amongsus.wav");
-    Music music_game = LoadMusicStream("beppo.wav");
-    Texture2D pauseT = LoadTextureFromImage(LoadImage("textures/space.png"));
+
+    Music music_pause = LoadMusicStream("music/amongsus.wav");
+    Music music_game = LoadMusicStream("music/beppo.wav");
+
     PlayMusicStream(music_game);
-    //PlayMusicStream(music_pause);
-    //PauseMusicStream(music_pause);
-    PauseMusicStream(music_game);
-    
+    UpdateMusicStream(music_game);
+
+    Texture2D pause_bg = LoadTextureFromImage(LoadImage("textures/space.png"));
+
     while (!WindowShouldClose()) {
         BeginDrawing();
-        ClearBackground(DARKGRAY);
+        ClearBackground(BLACK);
         UpdateMusicStream(music_game);
-        //UpdateMusicStream(music_pause);
+
         // pause game
-        
         if (IsKeyPressed(KEY_E)) {
             paused = (paused + 1) % 2;
-            if (!(paused % 2)) DisableCursor();
-            if (paused % 2) EnableCursor();
-            
+            if (paused) {
+                EnableCursor();
+                // lower volume on pause
+                temp_volume = volume;
+                pause_volume = volume/2.0f;
+                volume = pause_volume;
+                SetMusicVolume(music_game, volume);
+            }
+            if (!paused) {
+                DisableCursor();
+                // bring volume back to original state after unpause
+                volume = temp_volume;
+                SetMusicVolume(music_game, volume);
+            }
         }
-        
-        if(is_mouse_over_button(button_0) && IsMouseButtonPressed(MOUSE_BUTTON_LEFT)){
-            paused = (paused + 1) % 2;
-            if (!(paused % 2)) DisableCursor();
-            if (paused % 2) EnableCursor();
-        }
-        if(is_mouse_over_button(to_pause_music) && IsMouseButtonPressed(MOUSE_BUTTON_LEFT)){
-            musicbool = (musicbool + 1) % 2;
-            togglemusic(musicbool,&music_game);
-        }
-        if(is_mouse_over_button(volume_increase) && IsMouseButtonPressed(MOUSE_BUTTON_LEFT)){
-            if(inc<1) inc+=0.1;
-            SetMusicVolume(music_game,inc);
-        }
-        if(is_mouse_over_button(volume_decrease) && IsMouseButtonPressed(MOUSE_BUTTON_LEFT)){
-            if(inc>=0.1) inc-=0.1;
-            SetMusicVolume(music_game,inc);
-        }
-        if(is_mouse_over_button(sens_inc) && IsMouseButtonPressed(MOUSE_BUTTON_LEFT)){
-            if(MOUSE_SPEED<10) MOUSE_SPEED +=1;          
-        }
-        if(is_mouse_over_button(sens_dec) && IsMouseButtonPressed(MOUSE_BUTTON_LEFT)){
-            if(MOUSE_SPEED>1) MOUSE_SPEED -=1; 
-        }
+
+        // if(MouseOverButton(button_0) && IsMouseButtonPressed(MOUSE_BUTTON_LEFT)){
+        // }
+
+        // if(MouseOverButton(button_0) && IsMouseButtonPressed(MOUSE_BUTTON_LEFT)){
+        //     paused = (paused + 1) % 2;
+        //     if (!(paused % 2)) DisableCursor();
+        //     if (paused % 2) EnableCursor();
+        // }
+        // if(MouseOverButton(to_pause_music) && IsMouseButtonPressed(MOUSE_BUTTON_LEFT)){
+        //     music_bool = (music_bool + 1) % 2;
+        //     ToggleMusic(music_bool,&music_game);
+        // }
+        // if (MouseOverButton(volume_increase) && IsMouseButtonPressed(MOUSE_BUTTON_LEFT)) {
+        //     if(volume < 1.0f) volume += VOLUME_STEP;
+        //     SetMusicVolume(music_game, volume);
+        // }
+        // if(MouseOverButton(volume_decrease) && IsMouseButtonPressed(MOUSE_BUTTON_LEFT)){
+        //     if (volume > 0) volume -= VOLUME_STEP;
+        //     SetMusicVolume(music_game, volume);
+        // }
+        // if(MouseOverButton(sens_inc) && IsMouseButtonPressed(MOUSE_BUTTON_LEFT)){
+        //     if(MOUSE_SPEED<10) MOUSE_SPEED +=1;
+        // }
+        // if(MouseOverButton(sens_dec) && IsMouseButtonPressed(MOUSE_BUTTON_LEFT)){
+        //     if(MOUSE_SPEED>1) MOUSE_SPEED -=1;
+        // }
+
         if (!paused) {
-            
             move();
             DrawFOV();
-            internal_interface(current_hp);
-            DrawFPS(SCREEN_WIDTH-90,15);   
-            
+            DrawHud();
         }
-        
-        else if (paused) {
-            DrawMenu(SCREEN_WIDTH, SCREEN_HEIGHT, pauseT);
-            if(is_mouse_over_button(button_0)){
-                button_0.color = BLUE;
-            }else{
-                button_0.color = RED;
-            }
-            if(is_mouse_over_button(to_pause_music)){
-                to_pause_music.color = BLUE;
-            }else{
-                to_pause_music.color = RED;
-            }
-            if(is_mouse_over_button(volume_increase)){
-                volume_increase.color = SKYBLUE;
-            }else{
-                volume_increase.color = RED;
-            }
-            if(is_mouse_over_button(volume_decrease)){
-               volume_decrease.color = SKYBLUE;
-            }else{
-                volume_decrease.color = RED;
-            }
-            if(is_mouse_over_button(sens)){
-               sens.color = BLUE;
-            }else{
-                sens.color = RED;
-            }
-            if(is_mouse_over_button(sens_inc)){
-               sens_inc.color = SKYBLUE;
-            }else{
-                sens_inc.color = RED;
-            }
-            if(is_mouse_over_button(sens_dec)){
-               sens_dec.color = SKYBLUE;
-            }else{
-                sens_dec.color = RED;
-            }
-            DrawRectangleRec(button_0.rect,button_0.color);
-            DrawRectangleRec(to_pause_music.rect,to_pause_music.color);
-            DrawRectangleRec(volume_increase.rect,volume_increase.color);
-            DrawRectangleRec(volume_decrease.rect,volume_decrease.color);
-            DrawRectangleRec(sens.rect,sens.color);
-            DrawRectangleRec(sens_inc.rect,sens_inc.color);
-            DrawRectangleRec(sens_dec.rect,sens_dec.color);
-            DrawText("Continue",button_0.rect.x + button_0.rect.width / 2 - MeasureText("Continue",20)/2,button_0.rect.y + button_0.rect.height / 2 -20/2,20,WHITE);          
-            if(musicbool){
-                DrawText("Pause Music",to_pause_music.rect.x + to_pause_music.rect.width / 2 - MeasureText("Pause Music",20)/2,to_pause_music.rect.y + to_pause_music.rect.height / 2 -20/2,20,WHITE);
-            }else{
-                DrawText("Res Music",to_pause_music.rect.x + to_pause_music.rect.width / 2 - MeasureText("Res Music",20)/2,to_pause_music.rect.y + to_pause_music.rect.height / 2 -20/2,20,WHITE);
-            }
-            DrawText(TextFormat("Sens | %d",MOUSE_SPEED),sens.rect.x + sens.rect.width / 2 - MeasureText("Sens     ",20)/2,sens.rect.y + sens.rect.height / 2 -20/2,20,WHITE);
-            DrawText("+",SCREEN_WIDTH/2 + 102,SCREEN_HEIGHT/2 - 95,30,WHITE); //volume inc
-            DrawText("-",SCREEN_WIDTH/2 - 87,SCREEN_HEIGHT/2 - 95,30,WHITE); // volume dec
-            DrawText("+",SCREEN_WIDTH/2 + 102,SCREEN_HEIGHT/2 - 145,30,WHITE); //sens inc
-            DrawText("-",SCREEN_WIDTH/2 - 87,SCREEN_HEIGHT/2 - 145,30,WHITE); // sens dec
 
+        else if (paused) {
+            DrawButtons();
         }
-        
+
+        // else if (paused) {
+        //     DrawPauseMenu(pause_bg);
+        //     if(MouseOverButton(button_0)){
+        //         button_0.color = BLUE;
+        //     } else {
+        //         button_0.color = RED;
+        //     }
+        //     if(MouseOverButton(to_pause_music)){
+        //         to_pause_music.color = BLUE;
+        //     }else{
+        //         to_pause_music.color = RED;
+        //     }
+        //     if(MouseOverButton(volume_increase)){
+        //         volume_increase.color = SKYBLUE;
+        //     }else{
+        //         volume_increase.color = RED;
+        //     }
+        //     if(MouseOverButton(volume_decrease)){
+        //         volume_decrease.color = SKYBLUE;
+        //     }else{
+        //         volume_decrease.color = RED;
+        //     }
+        //     if(MouseOverButton(sens)){
+        //         sens.color = BLUE;
+        //     }else{
+        //         sens.color = RED;
+        //     }
+        //     if(MouseOverButton(sens_inc)){
+        //         sens_inc.color = SKYBLUE;
+        //     }else{
+        //         sens_inc.color = RED;
+        //     }
+        //     if(MouseOverButton(sens_dec)){
+        //         sens_dec.color = SKYBLUE;
+        //     }else{
+        //         sens_dec.color = RED;
+        //     }
+
+        // DrawRectangleRec(button_0.rect,button_0.color);
+        // DrawRectangleRec(to_pause_music.rect,to_pause_music.color);
+        // DrawRectangleRec(volume_increase.rect,volume_increase.color);
+        // DrawRectangleRec(volume_decrease.rect,volume_decrease.color);
+        // DrawRectangleRec(sens.rect,sens.color);
+        // DrawRectangleRec(sens_inc.rect,sens_inc.color);
+        // DrawRectangleRec(sens_dec.rect,sens_dec.color);
+        // DrawText("Continue",button_0.rect.x + button_0.rect.width / 2 - (float)MeasureText("Continue", 20)/2, button_0.rect.y + button_0.rect.height/2 - 20.0/2, 20, WHITE);
+
+        // if(music_bool){
+        //     DrawText("Pause Music", to_pause_music.rect.x + to_pause_music.rect.width/2 - (float)MeasureText("Pause Music", 20)/2, to_pause_music.rect.y + to_pause_music.rect.height/2 - 20.0/2,20,WHITE);
+        // } else {
+        //     DrawText("Res Music",to_pause_music.rect.x + to_pause_music.rect.width / 2 - (float)MeasureText("Res Music", 20)/2, to_pause_music.rect.y + to_pause_music.rect.height/2 - 20.0/2, 20, WHITE);
+        // }
+        // DrawText(TextFormat("Sense | %d", MOUSE_SPEED), sens.rect.x + sens.rect.width / 2 - (float)MeasureText("Sens     ",20)/2,sens.rect.y + sens.rect.height / 2 - 20.0/2,20,WHITE);
+        // DrawText("+",SCREEN_WIDTH/2 + 102,SCREEN_HEIGHT/2 - 95,30,WHITE); //volume inc
+        // DrawText("-",SCREEN_WIDTH/2 - 87,SCREEN_HEIGHT/2 - 95,30,WHITE); // volume dec
+        // DrawText("+",SCREEN_WIDTH/2 + 102,SCREEN_HEIGHT/2 - 145,30,WHITE); //sens inc
+        // DrawText("-",SCREEN_WIDTH/2 - 87,SCREEN_HEIGHT/2 - 145,30,WHITE); // sens dec
+
         EndDrawing();
     }
-    UnloadTexture(pauseT);
-    //UnloadMusicStream(music_pause);
-    UnloadSound(sound_pause);
+
+
+    UnloadTexture(pause_bg);
+
+    UnloadMusicStream(music_pause);
     UnloadMusicStream(music_game);
+
     CloseAudioDevice();
     CloseWindow();
     return 0;
-}
+    }
