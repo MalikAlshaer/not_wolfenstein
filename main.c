@@ -99,11 +99,41 @@ void DrawHud(){
     //coords
     DrawText(TextFormat("x:%.2f y:%.2f", player.x, player.y), 10, 10, 20, BLUE);
 
+
+
     // crosshair
-    DrawRectangle(SCREEN_WIDTH/2,       SCREEN_HEIGHT/2 + 15,   5,      10,     WHITE);//assagı
-    DrawRectangle(SCREEN_WIDTH/2,       SCREEN_HEIGHT/2 - 20,   5,      10,     WHITE);// yukarı
-    DrawRectangle(SCREEN_WIDTH/2 + 15,  SCREEN_HEIGHT/2,        10,     5,      WHITE);//sag
-    DrawRectangle(SCREEN_WIDTH/2 - 20,  SCREEN_HEIGHT/2,        10,     5,      WHITE);//sol
+    int crosshair_length = 10, crosshair_width = 3, crosshair_separation = 10;
+    // top
+    DrawRectangle(
+            SCREEN_WIDTH/2 - crosshair_width/2,
+            SCREEN_HEIGHT/2 - crosshair_length - crosshair_separation,
+            crosshair_width,
+            crosshair_length,
+            WHITE);
+
+    // bottom
+    DrawRectangle(
+            SCREEN_WIDTH/2 - crosshair_width/2,
+            SCREEN_HEIGHT/2 + crosshair_separation,
+            crosshair_width,
+            crosshair_length,
+            WHITE);
+
+    // right
+    DrawRectangle(
+            SCREEN_WIDTH/2 + crosshair_separation,
+            SCREEN_HEIGHT/2 - crosshair_width/2,
+            crosshair_length,
+            crosshair_width,
+            WHITE);
+
+    // left
+    DrawRectangle(
+            SCREEN_WIDTH/2 - crosshair_length - crosshair_separation,
+            SCREEN_HEIGHT/2 - crosshair_width/2,
+            crosshair_length,
+            crosshair_width,
+            WHITE);
 
     //minimap
     float mini_point_x = player.x/50 * 12 + SCREEN_WIDTH - 152;
@@ -200,7 +230,7 @@ void move(){
             player.x = temp_x;
             player.y = temp_y;
             if(player.hp <= 120) player.hp += 0.2;
-        }else{
+        } else {
             player.hp -= 0.4;
         }
     }
@@ -214,41 +244,24 @@ void ToggleMusic(int music_bool, Music *music){
 int main(void) {
     SetTargetFPS(FPS);
     InitWindow(SCREEN_WIDTH, SCREEN_HEIGHT, "not_wolfenstein.exe");
-    InitButtons(); // visual stuff from our interface library
-    InitAudioDevice(); // hardware (from raylib)
-    InitAudio(); // volume and stuff (also from interface library)
+    DefineButtons(); // visual stuff from our interface library
+    InitAudioDevice();
     DisableCursor();
 
-    Music music_pause = LoadMusicStream("music/amongsus.wav");
-    Music music_game = LoadMusicStream("music/beppo.wav");
+    InitGameState(); // set up all variables to be used throughout files (eg. paused, volume, etc.)
 
-    PlayMusicStream(music_game);
-    UpdateMusicStream(music_game);
+    InitMusic();
 
-    Texture2D pause_bg = LoadTextureFromImage(LoadImage("textures/space.png"));
+    InitTextures();
 
     while (!WindowShouldClose()) {
         BeginDrawing();
         ClearBackground(BLACK);
-        UpdateMusicStream(music_game);
+        UpdateMusicStream(game_music);
 
         // pause game
         if (IsKeyPressed(KEY_E)) {
-            paused = (paused + 1) % 2;
-            if (paused) {
-                EnableCursor();
-                // lower volume on pause
-                temp_volume = volume;
-                pause_volume = volume/2.0f;
-                volume = pause_volume;
-                SetMusicVolume(music_game, volume);
-            }
-            if (!paused) {
-                DisableCursor();
-                // bring volume back to original state after unpause
-                volume = temp_volume;
-                SetMusicVolume(music_game, volume);
-            }
+            PauseGame();
         }
 
         // if(MouseOverButton(button_0) && IsMouseButtonPressed(MOUSE_BUTTON_LEFT)){
@@ -261,15 +274,15 @@ int main(void) {
         // }
         // if(MouseOverButton(to_pause_music) && IsMouseButtonPressed(MOUSE_BUTTON_LEFT)){
         //     music_bool = (music_bool + 1) % 2;
-        //     ToggleMusic(music_bool,&music_game);
+        //     ToggleMusic(music_bool,&game_music);
         // }
         // if (MouseOverButton(volume_increase) && IsMouseButtonPressed(MOUSE_BUTTON_LEFT)) {
         //     if(volume < 1.0f) volume += VOLUME_STEP;
-        //     SetMusicVolume(music_game, volume);
+        //     SetMusicVolume(game_music, volume);
         // }
         // if(MouseOverButton(volume_decrease) && IsMouseButtonPressed(MOUSE_BUTTON_LEFT)){
         //     if (volume > 0) volume -= VOLUME_STEP;
-        //     SetMusicVolume(music_game, volume);
+        //     SetMusicVolume(game_music, volume);
         // }
         // if(MouseOverButton(sens_inc) && IsMouseButtonPressed(MOUSE_BUTTON_LEFT)){
         //     if(MOUSE_SPEED<10) MOUSE_SPEED +=1;
@@ -278,14 +291,23 @@ int main(void) {
         //     if(MOUSE_SPEED>1) MOUSE_SPEED -=1;
         // }
 
-        if (!paused) {
+        if (!volume_paused) {
+        }
+
+        else if (volume_paused) {
+
+        }
+
+        if (!game_paused) {
             move();
             DrawFOV();
             DrawHud();
         }
 
-        else if (paused) {
+        else if (game_paused) {
+            DrawPauseMenu();
             DrawButtons();
+            PressButton();
         }
 
         // else if (paused) {
@@ -349,13 +371,15 @@ int main(void) {
         EndDrawing();
     }
 
+    FreeButtons();
 
     UnloadTexture(pause_bg);
 
-    UnloadMusicStream(music_pause);
-    UnloadMusicStream(music_game);
+    UnloadMusicStream(pause_music);
+    UnloadMusicStream(game_music);
 
     CloseAudioDevice();
     CloseWindow();
     return 0;
+
     }
