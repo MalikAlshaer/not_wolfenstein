@@ -1,7 +1,5 @@
 Todo:
-1. game adjustments
-2. nevermind fisheye still needs some work
-3. mini map
-4. form for submition asdfasdfasdf
-5. draw a flowchart(sike)
-6. i need to learn the uses of headers or cooked
+1. game objectjive (exit the maze)
+2. create a new map (30 x 30)
+3. start and end menu (hp or timer)
+4. nevermind fisheye still needs some work
