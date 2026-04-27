@@ -6,14 +6,17 @@
 #include "interface.h"
 #include "buttons.h"
 
-#define VOLUME_STEP 0.1
-#define TEXT_PADDING 10
+#define FONT_SIZE SCREEN_WIDTH/70
+#define TEXT_PADDING SCREEN_WIDTH/192
+
+#define DEFAULT_BUTTON_COLOR GREEN
+#define HOVER_BUTTON_COLOR GRAY
 
 Button *button_list = NULL;
 int button_count = 0;
 
 void DrawPauseMenu() {
-    DrawTexture(pause_bg, SCREEN_WIDTH/2 - pause_bg.width/2, SCREEN_HEIGHT/2 - pause_bg.height/2, RAYWHITE);
+    // DrawTexture(pause_bg, SCREEN_WIDTH/2 - pause_bg.width/2, SCREEN_HEIGHT/2 - pause_bg.height/2, RAYWHITE);
     DrawText("GAME PAUSED", SCREEN_WIDTH/2 - 98, SCREEN_HEIGHT/2 - 190, 30, WHITE);
 }
 
@@ -24,8 +27,8 @@ void InitButton(int pos_x, int pos_y, int width, int height, char *text, Color c
     button.width = (width) ? width : MeasureText(text, FONT_SIZE) + TEXT_PADDING * 2; // if the width is not 0 use it otherwise use text length
     button.height = (height) ? height : FONT_SIZE + TEXT_PADDING * 2; // same as last line
     // BECUASE YOU NEED TO USE THEM HERE
-    button.pos_x = pos_x - button.width/2;
-    button.pos_y = pos_y - button.height/2;
+    button.pos_x = pos_x - button.width/2; // use center of button as base for location
+    button.pos_y = pos_y - button.height/2; // (instead of the top right corner)
     button.text = strdup(text);
     button.color = color;
     button.function = function;
@@ -40,8 +43,12 @@ void InitButton(int pos_x, int pos_y, int width, int height, char *text, Color c
 }
 
 void DefineButtons() {
-    InitButton(SCREEN_WIDTH/2, SCREEN_HEIGHT/2, 0, 0, "RESUME", RED, ResumePause); // resume
-    InitButton(SCREEN_WIDTH/2, 3 * (SCREEN_HEIGHT/4), 0, 0, "MUSIC", RED, VolumeOnOff);
+    InitButton(20 * SCREEN_WIDTH/40,    10 * SCREEN_HEIGHT/20,  0,  0, "RESUME",  DEFAULT_BUTTON_COLOR, PauseGame); // resume
+    InitButton(20 * SCREEN_WIDTH/41,    12 * SCREEN_HEIGHT/20,  0,  0, "-",       DEFAULT_BUTTON_COLOR, DecMouseSens);
+    InitButton(21 * SCREEN_WIDTH/41,    12 * SCREEN_HEIGHT/20,  0,  0, "+",       DEFAULT_BUTTON_COLOR, IncMouseSens);
+    InitButton(20 * SCREEN_WIDTH/40,    14 * SCREEN_HEIGHT/20,  0,  0, "MUSIC",   DEFAULT_BUTTON_COLOR, MusicOnOff); // toggle music
+    InitButton(18 * SCREEN_WIDTH/40,    14 * SCREEN_HEIGHT/20,  0,  0, "-",       DEFAULT_BUTTON_COLOR, DecMusicVolume); // dec music
+    InitButton(22 * SCREEN_WIDTH/40,    14 * SCREEN_HEIGHT/20,  0,  0, "+",       DEFAULT_BUTTON_COLOR, IncMusicVolume); // inc music
 }
 
 void DrawButtons() {
@@ -65,7 +72,7 @@ void PressButton() {
                 (int)mouse.y > button_list[j].pos_y &&
                 (int)mouse.y < button_list[j].pos_y + button_list[j].height)
         {
-            button_list[j].color = BLUE;
+            button_list[j].color = HOVER_BUTTON_COLOR;
 
             if (IsMouseButtonPressed(MOUSE_BUTTON_LEFT)) {
                 button_list[j].function();
@@ -73,7 +80,7 @@ void PressButton() {
         }
 
         else {
-            button_list[j].color = RED;
+            button_list[j].color = DEFAULT_BUTTON_COLOR;
         }
     }
 }
