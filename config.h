@@ -24,7 +24,7 @@ extern Music game_music;
 // extern Music pause_music; // dont need this
 
 extern Texture2D pause_bg;
-extern Texture2D wall;
+extern Texture2D wall_texture;
 
 void InitGameState();
 

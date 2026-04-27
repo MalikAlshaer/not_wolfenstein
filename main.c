@@ -141,6 +141,11 @@ void DrawHud(){
 
 //draws a vertical line centered around the horizontal center axis of window
 void DrawVerticalLine(double height, double x, double distance){
+    static int wall_slice = 0;
+    wall_slice = (wall_slice + 800/CELL_SIZE) % 800;
+    printf("%d\n", wall_slice);
+
+    Rectangle vertical_slice = {wall_slice, 0, 1, 800};
     Rectangle vertical_rect = {x, SCREEN_HEIGHT/2.0 - height/2.0, 1, height};
 
     int intensity = 255 - ((distance / RENDER_DISTANCE) * 255);
@@ -150,7 +155,8 @@ void DrawVerticalLine(double height, double x, double distance){
    //you can change {red, green, blue, transparency}
     Color wallColor = {0, 255, 0, intensity};
 
-    DrawRectangleRec(vertical_rect, wallColor);
+    // DrawRectangleRec(vertical_rect, wallColor);
+    DrawTexturePro(wall_texture, vertical_slice, vertical_rect, (Vector2){0, 0}, 0.0, GRAY);
 }
 
 void DrawFOV(){
@@ -167,6 +173,7 @@ void DrawFOV(){
 
             // depth of field basically
             visual_height = (SCREEN_HEIGHT * CELL_SIZE) / distance;
+
             DrawVerticalLine(visual_height, x, distance);
         }
     }
@@ -279,7 +286,7 @@ int main(void) {
     FreeButtons();
 
     UnloadTexture(pause_bg);
-    UnloadTexture(wall);
+    UnloadTexture(wall_texture);
 
     // UnloadMusicStream(pause_music);
     UnloadMusicStream(game_music);

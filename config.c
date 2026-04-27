@@ -14,6 +14,7 @@ Music game_music;
 // Music pause_music;
 
 Texture2D pause_bg;
+Texture2D wall_texture;
 
 void InitGameState() {
     mouse_sens = 5;
@@ -34,7 +35,7 @@ void InitMusic() {
 }
 
 void InitTextures() {
-    wall = LoadTextureFromImage(LoadImage("textures/wall.png"));
+    wall_texture = LoadTextureFromImage(LoadImage("textures/wall.png"));
 
     pause_bg = LoadTextureFromImage(LoadImage("textures/space.png"));
     pause_bg.width = SCREEN_WIDTH;
