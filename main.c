@@ -279,6 +279,7 @@ int main(void) {
     FreeButtons();
 
     UnloadTexture(pause_bg);
+    UnloadTexture(wall);
 
     // UnloadMusicStream(pause_music);
     UnloadMusicStream(game_music);

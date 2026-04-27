@@ -34,6 +34,8 @@ void InitMusic() {
 }
 
 void InitTextures() {
+    wall = LoadTextureFromImage(LoadImage("textures/wall.png"));
+
     pause_bg = LoadTextureFromImage(LoadImage("textures/space.png"));
     pause_bg.width = SCREEN_WIDTH;
     pause_bg.height = SCREEN_HEIGHT;
