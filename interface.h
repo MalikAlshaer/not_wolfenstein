@@ -3,6 +3,7 @@
 #include "config.h"
 #include "raylib.h"
 
+// understand this
 typedef void (*Function)(void);
 
 typedef struct Button{
