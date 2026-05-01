@@ -17,7 +17,10 @@ int button_count = 0;
 
 void DrawPauseMenu() {
     // DrawTexture(pause_bg, SCREEN_WIDTH/2 - pause_bg.width/2, SCREEN_HEIGHT/2 - pause_bg.height/2, RAYWHITE);
+    DrawRectangleRec((Rectangle){0, 0, SCREEN_WIDTH, SCREEN_WIDTH}, (Color){0, 0, 0, 90}); // Dim screen
     DrawText("GAME PAUSED", SCREEN_WIDTH/2 - 98, SCREEN_HEIGHT/2 - 190, 30, WHITE);
+    DrawButtons();
+    PressButton();
 }
 
 void InitButton(int pos_x, int pos_y, int width, int height, char *text, Color color, Function function) {

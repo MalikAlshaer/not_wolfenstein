@@ -1,18 +1,15 @@
-#include <stdio.h>
 #include <math.h>
-
 #include "raylib.h"
 #include "config.h"
 #include "interface.h"
 
 #define CELL_SIZE 50
-
 #define PLAYER_FOV 80
 
 #define RENDER_DISTANCE 500
 
-#define MAP_HEIGHT 10
-#define MAP_WIDTH 12
+#define MAP_HEIGHT 30
+#define MAP_WIDTH 30
 
 #define RAY_STEP PLAYER_FOV/SCREEN_WIDTH
 #define RAY_STEP_SIZE 0.7
@@ -20,16 +17,36 @@
 #define PLAYER_MOVEMENT_SPEED 1
 
 int map[MAP_HEIGHT][MAP_WIDTH] = {
-    {1,1,1,1,1,1,1,1,1,1,1,1},
-    {1,0,0,0,0,0,0,0,0,0,0,1},
-    {1,0,0,1,1,0,1,0,1,0,0,1},
-    {1,0,0,0,1,0,0,0,1,0,0,1},
-    {1,0,0,0,1,0,0,0,1,1,0,1},
-    {1,0,1,1,1,0,0,0,1,0,0,1},
-    {1,0,1,0,0,0,0,0,1,0,0,1},
-    {1,0,1,1,1,1,1,0,0,0,0,1},
-    {1,0,0,0,0,0,0,0,1,0,0,1},
-    {1,1,1,1,1,1,1,1,1,1,1,1},
+    {1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1},
+    {1,0,1,4,4,4,4,4,1,0,0,0,1,0,0,1,1,0,0,0,1,0,1,1,1,1,0,0,0,1},
+    {1,4,1,4,1,1,1,4,1,0,1,1,1,0,1,1,1,0,1,0,1,0,0,0,0,1,0,1,0,1},
+    {1,4,1,4,1,1,1,4,1,0,1,0,1,0,1,1,1,0,1,0,1,1,1,1,0,1,0,1,0,1},
+    {1,4,1,4,1,4,4,4,1,0,1,0,0,0,0,0,0,0,0,0,1,0,0,0,0,1,0,1,0,1},
+    {1,4,4,4,1,4,1,1,1,0,1,1,1,1,1,0,1,1,1,1,1,0,1,0,1,1,0,1,0,1},
+    {1,0,1,1,1,4,1,1,1,0,0,0,0,1,0,0,1,0,0,0,0,0,1,0,1,0,0,1,0,1},
+    {1,0,1,0,1,4,4,4,1,0,1,1,0,0,0,1,1,0,1,0,1,1,1,0,0,0,1,1,0,1},
+    {1,0,1,0,1,1,1,4,1,0,0,1,0,1,1,1,0,0,1,0,1,0,1,1,1,1,1,0,0,1},
+    {1,0,0,0,1,4,4,4,1,0,0,1,0,0,0,1,0,1,1,1,1,0,0,0,1,0,1,1,1,1},
+    {1,0,1,1,1,4,1,1,1,1,1,1,0,1,0,1,0,1,0,0,1,0,1,0,0,0,0,0,0,1},
+    {1,0,1,4,4,4,1,0,0,0,0,1,0,1,0,0,0,1,0,0,1,0,1,0,1,0,1,0,1,1},
+    {1,0,1,4,1,1,1,0,1,1,0,1,0,1,0,1,1,1,0,0,0,0,1,1,1,1,1,0,1,1},
+    {1,1,1,4,1,0,0,0,1,1,0,0,0,1,4,4,4,1,1,1,1,1,1,0,0,0,0,0,0,1},
+    {1,4,4,4,1,0,0,0,1,1,1,1,1,1,4,1,4,4,4,4,0,0,0,0,1,1,1,0,0,1},
+    {1,4,1,1,1,1,0,0,0,1,4,4,4,1,4,1,1,1,1,4,1,1,1,1,1,0,1,0,1,1},
+    {1,4,4,4,4,1,1,1,1,1,4,1,4,1,4,1,0,0,1,4,1,1,0,0,0,0,0,0,1,1},
+    {1,1,1,1,4,4,4,1,1,4,4,1,4,4,4,1,0,0,1,4,4,1,1,0,1,1,1,1,1,1},
+    {1,0,1,1,1,1,4,1,1,4,1,1,1,1,1,1,1,0,1,1,4,4,1,0,1,0,0,0,0,1},
+    {1,0,0,4,4,4,4,1,1,4,1,0,0,0,0,0,0,0,0,1,1,4,1,0,1,1,1,1,0,1},
+    {1,0,1,4,1,1,1,1,1,4,1,0,1,0,1,0,1,1,0,0,1,4,1,0,1,0,0,0,0,1},
+    {1,0,1,4,4,4,4,1,1,4,1,0,1,0,1,0,1,1,0,1,1,4,1,0,1,0,1,0,0,1},
+    {1,0,1,1,1,1,4,1,1,4,1,0,1,0,1,1,1,1,1,1,4,4,1,0,0,0,1,1,0,1},
+    {1,0,1,0,0,1,4,4,4,4,1,0,1,0,1,4,4,4,4,4,4,1,1,1,1,1,1,1,0,1},
+    {1,0,1,0,1,1,1,1,1,1,1,0,1,0,1,4,1,1,1,1,1,1,1,4,4,4,4,1,0,1},
+    {1,0,1,0,0,0,0,0,0,1,1,0,1,0,1,4,1,1,4,4,4,4,4,4,1,1,4,1,1,1},
+    {1,0,1,0,0,1,0,1,0,1,1,0,1,0,1,4,4,1,4,1,1,1,1,1,1,1,4,4,1,1},
+    {1,0,1,1,1,1,0,1,0,1,1,1,1,0,1,1,4,4,4,1,0,0,0,0,0,1,1,4,1,1},
+    {1,0,0,0,0,0,0,1,0,0,0,0,0,0,0,1,1,1,1,1,0,0,0,0,0,0,1,4,4,1},
+    {1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1},
 };
 
 typedef struct Player {
@@ -40,7 +57,8 @@ typedef struct Player {
 } Player;
 
 //               x    y    deg hp
-Player player = {100, 100, 45, 120};
+// Player player = {75, 125, 90, 120};
+Player player = {100, 100, 90, 120};
 
 // returns the distance to next wall assuming the player looks in given direction
 double GetDistance(double angle) {
@@ -76,7 +94,7 @@ double GetDistance(double angle) {
         }
     }
 
-    printf("WHAT THE HELL HAPPENED?\n");
+    // printf("WHAT THE HELL HAPPENED?\n");
     //exit(-1);
     return -1;
 }
@@ -131,19 +149,38 @@ void DrawHud(){
             crosshair_width,
             WHITE);
 
+    // tried changing some stuff ignore for now
+    //
     //minimap
-    float mini_point_x = player.x/50 * 12 + SCREEN_WIDTH - 152;
-    float mini_point_y = player.y/50 * 11;
-    DrawRectangle(SCREEN_WIDTH - 140,50,130,95,WHITE); //map background
-    DrawRectangle(mini_point_x,mini_point_y + 38,10,10,BLUE);
-    DrawText("mini map",SCREEN_WIDTH - 122,145,25,WHITE);
+    // int mini_loc_x = SCREEN_WIDTH - 140;
+    // int mini_loc_y = 50;
+    // int icon = 10;
+
+    // float mini_point_x = player.x/50 * MAP_WIDTH + mini_loc_x;
+    // float mini_point_y = player.y/50 * MAP_HEIGHT + mini_loc_y;
+    // // DrawRectangle(SCREEN_WIDTH - 140, 50, 130, 95, WHITE); //map background
+
+    // for (int a = 0; a < MAP_HEIGHT; a++) {
+    //     for (int b = 0; b < MAP_HEIGHT; b++) {
+    //         if (map[b][a] == 1) {
+    //             DrawRectangle(mini_loc_x + a * icon, mini_loc_y + b * icon, icon, icon, BLUE);
+    //         }
+
+    //         else {
+    //             DrawRectangle(SCREEN_WIDTH - 140 + a * 10, 50 + b * 10, 10, 10, WHITE);
+    //         }
+    //     }
+    // }
+
+    // DrawRectangle(mini_point_x - icon, mini_point_y,10,10,GREEN);
+    // DrawText("mini map",SCREEN_WIDTH - 122,145,25,WHITE);
 }
 
 //draws a vertical line centered around the horizontal center axis of window
 void DrawVerticalLine(double height, double x, double distance){
-    int wall_slice = (int)x % wall_texture.width;
+    int wall_slice = (int)x % wall_texture.width + player.angle;
 
-    Rectangle vertical_slice = {wall_slice, 0, 1, 800};
+    // Rectangle vertical_slice = {wall_slice, 0, 1, 800};
     Rectangle vertical_rect = {x, SCREEN_HEIGHT/2.0 - height/2.0, 1, height};
 
     int intensity = 255 - ((distance / RENDER_DISTANCE) * 255);
@@ -153,8 +190,8 @@ void DrawVerticalLine(double height, double x, double distance){
    //you can change {red, green, blue, transparency}
     Color wall_color = {130, 130, 130, intensity};
 
-    // DrawRectangleRec(vertical_rect, wallColor);
-    DrawTexturePro(wall_texture, vertical_slice, vertical_rect, (Vector2){0, 0}, 0.0, wall_color);
+    DrawRectangleRec(vertical_rect, wall_color);
+    // DrawTexturePro(wall_texture, vertical_slice, vertical_rect, (Vector2){0, 0}, 0.0, wall_color);
 }
 
 void DrawFOV(){
@@ -226,12 +263,15 @@ void move(){
     // if within map bounds
     if(map_x >= 0 && map_x < MAP_WIDTH && map_y >= 0 && map_y < MAP_HEIGHT) {
         // if there is not wall
-        if(map[map_y][map_x] == 0) {
+        if(map[map_y][map_x] != 1) {
             // commit changes
             player.x = temp_x;
             player.y = temp_y;
+
             if(player.hp <= 120) player.hp += 0.2;
-        } else {
+        } 
+
+        else {
             player.hp -= 0.4;
         }
     }
@@ -274,8 +314,6 @@ int main(void) {
 
         else if (game_paused) {
             DrawPauseMenu();
-            DrawButtons();
-            PressButton();
         }
 
         EndDrawing();
