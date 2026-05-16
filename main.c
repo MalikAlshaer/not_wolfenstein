@@ -29,18 +29,19 @@ int map[MAP_HEIGHT][MAP_WIDTH] = {
     {1,1,1,0,1,0,1,1,0,0,1,4,1},
     {1,0,0,0,0,0,0,0,0,0,1,4,1},
     {1,0,0,1,0,0,0,0,0,0,1,4,1},
-    {1,1,1,1,1,1,1,1,1,1,1,1,1}
+    {1,1,1,1,1,1,1,1,1,1,1,0,1}
     //in order to represent the game i created a simple map
     //4 refers to truth way
 };
 
 int gameparameter=0;
+
 typedef struct Player {
-    double x;
-    double y;
-    double angle;
-    int hp;
-    float counter;
+    double x;       // x coordinate of the player
+    double y;       // y coordinate of the player
+    double angle;   // direction the player is facing
+    int hp;         // health points
+    float counter;  // time left for the player to exit
 } Player;
 
 //               x    y    deg hp
@@ -296,25 +297,27 @@ int main(void) {
 
         // pause game
         if(gameparameter==0){
-                if (IsKeyPressed(KEY_E)) {
+            if (IsKeyPressed(KEY_E)) {
                 PauseGame();
-                }
+            }
 
-               DrawFOV();
+            DrawFOV();
 
-                if (!game_paused) {
-                    move();
-                    DrawHud();
-                    EndOfGame();
-                }
+            if (!game_paused) {
+                move();
+                DrawHud();
+                EndOfGame();
+            }
 
-               else if (game_paused) {
-                    DrawPauseMenu();
-                }
-        }else if(gameparameter==1){
+            else if (game_paused) {
+                DrawPauseMenu();
+            }
+        }
+        else if(gameparameter==1){
             DrawRectangle(SCREEN_WIDTH/4,SCREEN_HEIGHT/4,SCREEN_WIDTH/2,SCREEN_HEIGHT/2,RED);
             DrawText("You Win",SCREEN_WIDTH/4+200,SCREEN_HEIGHT/4+100,50,BLUE);
-        }else if(gameparameter==2){
+        }
+        else if(gameparameter==2){
             DrawRectangle(SCREEN_WIDTH/4,SCREEN_HEIGHT/4,SCREEN_WIDTH/2,SCREEN_HEIGHT/2,RED);
             DrawText("You Lost",SCREEN_WIDTH/4+200,SCREEN_HEIGHT/4+100,50,BLUE);
         }
