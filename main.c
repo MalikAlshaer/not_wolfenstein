@@ -3,6 +3,8 @@
 #include "config.h"
 #include "interface.h"
 
+#define FPS 60
+
 #define CELL_SIZE 50
 #define PLAYER_FOV 80
 
@@ -33,8 +35,6 @@ int map[MAP_HEIGHT][MAP_WIDTH] = {
     //in order to represent the game i created a simple map
     //4 refers to truth way
 };
-
-int gameparameter=0;
 
 typedef struct Player {
     double x;       // x coordinate of the player
@@ -265,19 +265,16 @@ void move(){
     }
 }
 
-void ToggleMusic(int music_bool, Music *music){
-    if (music_bool) { ResumeMusicStream(*music); }
-    else { PauseMusicStream(*music); }
-}
 void EndOfGame(){
     if(player.x >550 && player.x <600 && player.y >550 && player.y <600){
-        gameparameter=1;    
+        game_state = Win;    
     }
-    if(player.counter<=0 || player.hp<=0){
-        gameparameter=2;
+    if(player.counter <= 0 || player.hp <= 0){
+        game_state = Lose;
     }
 }
-int main(void) {
+
+void RunGame() {
     SetTargetFPS(FPS);
     InitWindow(SCREEN_WIDTH, SCREEN_HEIGHT, "not_wolfenstein.exe");
     DefineButtons(); // visual stuff from our interface library
@@ -296,44 +293,48 @@ int main(void) {
         UpdateMusicStream(game_music);
 
         // pause game
-        if(gameparameter==0){
+        if(game_state == Play || game_state == Pause){
             if (IsKeyPressed(KEY_E)) {
                 PauseGame();
             }
 
             DrawFOV();
 
-            if (!game_paused) {
+            if (game_state == Play) {
                 move();
                 DrawHud();
                 EndOfGame();
             }
 
-            else if (game_paused) {
+            else if (game_state == Pause) {
                 DrawPauseMenu();
             }
         }
-        else if(gameparameter==1){
-            DrawRectangle(SCREEN_WIDTH/4,SCREEN_HEIGHT/4,SCREEN_WIDTH/2,SCREEN_HEIGHT/2,RED);
-            DrawText("You Win",SCREEN_WIDTH/4+200,SCREEN_HEIGHT/4+100,50,BLUE);
-        }
-        else if(gameparameter==2){
-            DrawRectangle(SCREEN_WIDTH/4,SCREEN_HEIGHT/4,SCREEN_WIDTH/2,SCREEN_HEIGHT/2,RED);
-            DrawText("You Lost",SCREEN_WIDTH/4+200,SCREEN_HEIGHT/4+100,50,BLUE);
-        }
+
+        // else if(game_state == Win){
+        //     DrawRectangle(SCREEN_WIDTH/4,SCREEN_HEIGHT/4,SCREEN_WIDTH/2,SCREEN_HEIGHT/2,RED);
+        //     DrawText("You Win",SCREEN_WIDTH/4+200,SCREEN_HEIGHT/4+100,50,BLUE);
+        // }
+
+        // else if(game_state == Lose){
+        //     DrawRectangle(SCREEN_WIDTH/4,SCREEN_HEIGHT/4,SCREEN_WIDTH/2,SCREEN_HEIGHT/2,RED);
+        //     DrawText("You Lost",SCREEN_WIDTH/4+200,SCREEN_HEIGHT/4+100,50,BLUE);
+        // }
 
         EndDrawing();
     }
 
     FreeButtons();
 
-    UnloadTexture(pause_bg);
-    UnloadTexture(wall_texture);
+    UnloadMusic();
 
-    // UnloadMusicStream(pause_music);
-    UnloadMusicStream(game_music);
+    UnloadTextures();
 
     CloseAudioDevice();
     CloseWindow();
+}
+
+int main(void) {
+    RunGame();
     return 0;
 }

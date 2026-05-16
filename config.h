@@ -3,17 +3,24 @@
 
 #include "raylib.h"
 
-#define SCREEN_WIDTH 1920
-#define SCREEN_HEIGHT 1080
+#define SCREEN_WIDTH 1200
+#define SCREEN_HEIGHT 900
 
 // #define SCREEN_WIDTH 1000
 // #define SCREEN_HEIGHT 560
 
-#define FPS 60
+typedef enum {
+    Play = 0,
+    Pause,
+    Win,
+    Lose,
+} GameState;
+
+extern GameState game_state;
 
 extern int mouse_sens;
 
-extern int game_paused;
+// extern int game_paused;
 extern int volume_paused;
 
 extern float music_volume;
@@ -30,7 +37,11 @@ void InitGameState();
 
 void InitMusic();
 
+void UnloadMusic();
+
 void InitTextures();
+
+void UnloadTextures();
 
 void PauseGame();
 #endif
