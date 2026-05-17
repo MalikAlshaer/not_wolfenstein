@@ -17,7 +17,7 @@ int button_count = 0;
 
 void DrawPauseMenu() {
     DrawRectangleRec((Rectangle){0, 0, SCREEN_WIDTH, SCREEN_WIDTH}, (Color){0, 0, 0, 90}); // Dim screen
-    DrawText("GAME PAUSED", SCREEN_WIDTH/2 - MeasureText("GAME PAUSED", BUTTON_FONT_SIZE)/2, 3*SCREEN_HEIGHT/8, BUTTON_FONT_SIZE, WHITE); // pls don't change this :)
+    DrawText("GAME PAUSED", SCREEN_WIDTH/2 - MeasureText("GAME PAUSED", BUTTON_FONT_SIZE)/2, 6*SCREEN_HEIGHT/20, BUTTON_FONT_SIZE, WHITE); // pls don't change this :)
     DrawButtons();
     PressButton();
 }
@@ -55,12 +55,12 @@ void InitButton(int pos_x, int pos_y, int width, int height, char *text, Color c
 }
 
 void DefineButtons() {
-    InitButton(20 * SCREEN_WIDTH/40,    10 * SCREEN_HEIGHT/20,  0,  0, "RESUME",  DEFAULT_BUTTON_COLOR, PauseGame); // resume
-    InitButton(20 * SCREEN_WIDTH/41,    12 * SCREEN_HEIGHT/20,  0,  0, "-",       DEFAULT_BUTTON_COLOR, DecMouseSens);
-    InitButton(21 * SCREEN_WIDTH/41,    12 * SCREEN_HEIGHT/20,  0,  0, "+",       DEFAULT_BUTTON_COLOR, IncMouseSens);
-    InitButton(20 * SCREEN_WIDTH/40,    14 * SCREEN_HEIGHT/20,  0,  0, "MUSIC",   DEFAULT_BUTTON_COLOR, MusicOnOff); // toggle music
-    InitButton(18 * SCREEN_WIDTH/40,    14 * SCREEN_HEIGHT/20,  0,  0, "-",       DEFAULT_BUTTON_COLOR, DecMusicVolume); // dec music
-    InitButton(22 * SCREEN_WIDTH/40,    14 * SCREEN_HEIGHT/20,  0,  0, "+",       DEFAULT_BUTTON_COLOR, IncMusicVolume); // inc music
+    InitButton(20 * SCREEN_WIDTH/40,     8 * SCREEN_HEIGHT/20,  0,  0, "RESUME",    DEFAULT_BUTTON_COLOR, PauseGame); // resume
+    InitButton(20 * SCREEN_WIDTH/41,    10 * SCREEN_HEIGHT/20,  0,  0, "-",         DEFAULT_BUTTON_COLOR, DecMouseSens);
+    InitButton(21 * SCREEN_WIDTH/41,    10 * SCREEN_HEIGHT/20,  0,  0, "+",         DEFAULT_BUTTON_COLOR, IncMouseSens);
+    InitButton(20 * SCREEN_WIDTH/40,    12 * SCREEN_HEIGHT/20,  0,  0, "MUSIC",     DEFAULT_BUTTON_COLOR, MusicOnOff); // toggle music
+    InitButton(18 * SCREEN_WIDTH/40,    12 * SCREEN_HEIGHT/20,  0,  0, "-",         DEFAULT_BUTTON_COLOR, DecMusicVolume); // dec music
+    InitButton(22 * SCREEN_WIDTH/40,    12 * SCREEN_HEIGHT/20,  0,  0, "+",         DEFAULT_BUTTON_COLOR, IncMusicVolume); // inc music
 }
 
 void DrawButtons() {

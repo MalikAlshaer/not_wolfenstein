@@ -104,14 +104,15 @@ void DrawHud(){
     // fps
     DrawFPS(SCREEN_WIDTH - 90, 15);
 
-    // hp
-    DrawText(TextFormat("HP"),10,35,20,GREEN);
-    DrawRectangle(45, 36, player.hp, 15, GREEN); // current_hp=120 initial
-
     //coords
     DrawText(TextFormat("x: %.2f y: %.2f", player.x, player.y), 10, 10, 20, BLUE);
+
+    // hp
+    DrawText(TextFormat("HP"), 10 ,35, 20, GREEN);
+    DrawRectangle(45, 35, player.hp, 15, GREEN); // current_hp=120 initial
+
+    // time left
     DrawText(TextFormat("remaining: %.1f s", player.counter), 10, 60, 20, RED);
-    player.counter -=0.02;
 
     // crosshair
     int crosshair_length = 10, crosshair_width = 3, crosshair_separation = 10;
@@ -160,10 +161,9 @@ void DrawVerticalLine(double height, double x, double distance){
     if (intensity > 255) intensity = 255;
 
    //you can change {red, green, blue, transparency}
-    Color wall_color = {130, 130, 0, intensity};
+    Color wall_color = {120, 140, 140, intensity};
 
     DrawRectangleRec(vertical_rect, wall_color);
-    // DrawTexturePro(wall_texture, vertical_slice, vertical_rect, (Vector2){0, 0}, 0.0, wall_color);
 }
 
 void DrawFOV(){
@@ -250,14 +250,17 @@ void move(){
 }
 
 void CheckEnd() { // rename to check_win() or something like that
+    player.counter -= 0.02;
     if(
             player.x > COORD2CELL(exit_tile.x) - 25 && player.x < COORD2CELL(exit_tile.x) + 25 &&
             player.y > COORD2CELL(exit_tile.y) - 25 && player.y < COORD2CELL(exit_tile.y) + 25
       ) {
         game_state = Win;    
+        EnableCursor();
     }
     if (player.counter <= 0 || player.hp <= 0) {
         game_state = Lose;
+        EnableCursor();
     }
 }
 

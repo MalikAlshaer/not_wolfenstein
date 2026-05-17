@@ -45,3 +45,6 @@ void DecMouseSens() {
 void IncMouseSens() {
     mouse_sens += 1;
 }
+
+// placeholder function for testing
+void DoNothing() {}

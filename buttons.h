@@ -13,4 +13,6 @@ void IncMouseSens(void);
 
 void DecMouseSens(void);
 
+void DoNothing(void);
+
 #endif
