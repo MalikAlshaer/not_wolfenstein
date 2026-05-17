@@ -294,7 +294,7 @@ void RunGame() {
 
         // pause game
         if(game_state == Play || game_state == Pause){
-            if (IsKeyPressed(KEY_E)) {
+            if (IsKeyPressed(KEY_P)) {
                 PauseGame();
             }
 
