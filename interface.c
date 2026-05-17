@@ -24,7 +24,7 @@ void DrawPauseMenu() {
 
 void DrawEndScreen() {
     if (game_state == Win) {
-        DrawText("You Win", SCREEN_WIDTH/2 - MeasureText("You Win", FONT_SIZE), SCREEN_HEIGHT/2 + FONT_SIZE/2, FONT_SIZE, GREEN);
+        DrawText("You Win", SCREEN_WIDTH/2 - MeasureText("You Win", FONT_SIZE)/2, SCREEN_HEIGHT/2 - FONT_SIZE/2, FONT_SIZE, GREEN);
     }
     else if (game_state == Lose) {
         DrawText("Game Over", SCREEN_WIDTH/2 - MeasureText("Game Over", FONT_SIZE)/2, SCREEN_HEIGHT/2 - FONT_SIZE/2, FONT_SIZE, RED);
