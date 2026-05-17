@@ -50,7 +50,7 @@ typedef struct {
 } Tile;
 
 const Tile start_tile = {.x = 1, .y = 1};
-const Tile exit_tile = {.x = 11, .y = 11}; // setting any of the values to 12 doesn't work for some reason despite being within bounds
+const Tile exit_tile = {.x = 11, .y = 12};
 
 typedef struct Player {
     double x;       // x coordinate of the player
@@ -252,7 +252,7 @@ void move(){
 void CheckEnd() { // rename to check_win() or something like that
     if(
             player.x > COORD2CELL(exit_tile.x) - 25 && player.x < COORD2CELL(exit_tile.x) + 25 &&
-            player.y > COORD2CELL(exit_tile.y) - 25 && player.y < COORD2CELL(exit_tile.x) + 25
+            player.y > COORD2CELL(exit_tile.y) - 25 && player.y < COORD2CELL(exit_tile.y) + 25
       ) {
         game_state = Win;    
     }
