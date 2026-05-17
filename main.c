@@ -280,12 +280,12 @@ void RunGame() {
         UpdateMusicStream(game_music);
 
         // pause game
+        DrawFOV();
         if(game_state == Play || game_state == Pause){
             if (IsKeyPressed(KEY_P)) {
                 PauseGame();
             }
 
-            DrawFOV();
 
             if (game_state == Play) {
                 CheckEnd();

@@ -23,6 +23,7 @@ void DrawPauseMenu() {
 }
 
 void DrawEndScreen() {
+    DrawRectangleRec((Rectangle){0, 0, SCREEN_WIDTH, SCREEN_WIDTH}, (Color){0, 0, 0, 90}); // Dim screen
     if (game_state == Win) {
         DrawText("You Win", SCREEN_WIDTH/2 - MeasureText("You Win", FONT_SIZE)/2, SCREEN_HEIGHT/2 - FONT_SIZE/2, FONT_SIZE, GREEN);
     }
