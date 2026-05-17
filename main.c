@@ -18,6 +18,13 @@
 
 #define PLAYER_MOVEMENT_SPEED 1
 
+// take any coordinate from 0..MAP_WIDTH or 0..MAP_HEIGHT and
+// return the value converted to cell coordinates
+#define COORD2CELL(i) (i * CELL_SIZE + CELL_SIZE/2.0)
+// take any cell coordinate from 0..MAP_HEIGHT*CELL_SIZE or 0..MAP_WIDTH*CELL_SIZE and
+// return the value converted to map coordinates
+#define CELL2COORD(i) (i / CELL_SIZE)
+
 int map[MAP_HEIGHT][MAP_WIDTH] = {
     {1,1,1,1,1,1,1,1,1,1,1,1,1},
     {1,4,4,4,4,4,4,4,4,4,4,0,1},
@@ -31,10 +38,19 @@ int map[MAP_HEIGHT][MAP_WIDTH] = {
     {1,1,1,0,1,0,1,1,0,0,1,4,1},
     {1,0,0,0,0,0,0,0,0,0,1,4,1},
     {1,0,0,1,0,0,0,0,0,0,1,4,1},
-    {1,1,1,1,1,1,1,1,1,1,1,0,1}
+    {1,1,1,1,1,1,1,1,1,1,1,4,1}
     //in order to represent the game i created a simple map
     //4 refers to truth way
 };
+
+typedef struct {
+    // x and y might be reversed idk
+    int x;
+    int y;
+} Tile;
+
+const Tile start_tile = {.x = 1, .y = 1};
+const Tile exit_tile = {.x = 11, .y = 11}; // setting any of the values to 12 doesn't work for some reason despite being within bounds
 
 typedef struct Player {
     double x;       // x coordinate of the player
@@ -44,9 +60,8 @@ typedef struct Player {
     float counter;  // time left for the player to exit
 } Player;
 
-//               x    y    deg hp
- Player player = {75, 125, 90, 120, 60};
-//Player player = {100, 100, 90, 120};
+// Player player = {start_tile.x * CELL_SIZE + CELL_SIZE/2.0, start_tile.y * CELL_SIZE + CELL_SIZE/2.0, 90, 120, 60};
+Player player = {COORD2CELL(start_tile.x), COORD2CELL(start_tile.y), 90, 100, 60};
 
 // returns the distance to next wall assuming the player looks in given direction
 double GetDistance(double angle) {
@@ -65,8 +80,8 @@ double GetDistance(double angle) {
         }
 
         // which cell is the ray inside now
-        int cell_x = ray_x / CELL_SIZE;
-        int cell_y = ray_y / CELL_SIZE;
+        int cell_x = CELL2COORD(ray_x);
+        int cell_y = CELL2COORD(ray_y);
 
         if(cell_x < 0 || cell_x >= MAP_WIDTH || cell_y < 0 || cell_y >= MAP_HEIGHT)
             return -1;
@@ -82,8 +97,6 @@ double GetDistance(double angle) {
         }
     }
 
-    // printf("WHAT THE HELL HAPPENED?\n");
-    //exit(-1);
     return -1;
 }
 
@@ -94,9 +107,6 @@ void DrawHud(){
     // hp
     DrawText(TextFormat("HP"),10,35,20,GREEN);
     DrawRectangle(45, 36, player.hp, 15, GREEN); // current_hp=120 initial
-
-    // DrawText("to pause press E",SCREEN_WIDTH/2-87,20,20,WHITE);
-    // DrawText("to sprint keep ctrl",SCREEN_WIDTH/2-95,49,20,WHITE);
 
     //coords
     DrawText(TextFormat("x: %.2f y: %.2f", player.x, player.y), 10, 10, 20, BLUE);
@@ -136,32 +146,6 @@ void DrawHud(){
             crosshair_length,
             crosshair_width,
             WHITE);
-
-    // tried changing some stuff ignore for now
-    //
-    //minimap
-    // int mini_loc_x = SCREEN_WIDTH - 140;
-    // int mini_loc_y = 50;
-    // int icon = 10;
-
-    // float mini_point_x = player.x/50 * MAP_WIDTH + mini_loc_x;
-    // float mini_point_y = player.y/50 * MAP_HEIGHT + mini_loc_y;
-    // // DrawRectangle(SCREEN_WIDTH - 140, 50, 130, 95, WHITE); //map background
-
-    // for (int a = 0; a < MAP_HEIGHT; a++) {
-    //     for (int b = 0; b < MAP_HEIGHT; b++) {
-    //         if (map[b][a] == 1) {
-    //             DrawRectangle(mini_loc_x + a * icon, mini_loc_y + b * icon, icon, icon, BLUE);
-    //         }
-
-    //         else {
-    //             DrawRectangle(SCREEN_WIDTH - 140 + a * 10, 50 + b * 10, 10, 10, WHITE);
-    //         }
-    //     }
- 
-
-    // DrawRectangle(mini_point_x - icon, mini_point_y,10,10,GREEN);
-     //DrawText("mini map",SCREEN_WIDTH - 122,145,25,WHITE);
 }
 
 //draws a vertical line centered around the horizontal center axis of window
@@ -265,11 +249,14 @@ void move(){
     }
 }
 
-void EndOfGame(){
-    if(player.x >550 && player.x <600 && player.y >550 && player.y <600){
+void CheckEnd() { // rename to check_win() or something like that
+    if(
+            player.x > COORD2CELL(exit_tile.x) - 25 && player.x < COORD2CELL(exit_tile.x) + 25 &&
+            player.y > COORD2CELL(exit_tile.y) - 25 && player.y < COORD2CELL(exit_tile.x) + 25
+      ) {
         game_state = Win;    
     }
-    if(player.counter <= 0 || player.hp <= 0){
+    if (player.counter <= 0 || player.hp <= 0) {
         game_state = Lose;
     }
 }
@@ -301,9 +288,9 @@ void RunGame() {
             DrawFOV();
 
             if (game_state == Play) {
+                CheckEnd();
                 move();
                 DrawHud();
-                EndOfGame();
             }
 
             else if (game_state == Pause) {
@@ -311,20 +298,15 @@ void RunGame() {
             }
         }
 
-        // else if(game_state == Win){
-        //     DrawRectangle(SCREEN_WIDTH/4,SCREEN_HEIGHT/4,SCREEN_WIDTH/2,SCREEN_HEIGHT/2,RED);
-        //     DrawText("You Win",SCREEN_WIDTH/4+200,SCREEN_HEIGHT/4+100,50,BLUE);
-        // }
-
-        // else if(game_state == Lose){
-        //     DrawRectangle(SCREEN_WIDTH/4,SCREEN_HEIGHT/4,SCREEN_WIDTH/2,SCREEN_HEIGHT/2,RED);
-        //     DrawText("You Lost",SCREEN_WIDTH/4+200,SCREEN_HEIGHT/4+100,50,BLUE);
-        // }
+        else if(game_state == Win || game_state == Lose) {
+            StopMusicStream(game_music);
+            DrawEndScreen();
+        }
 
         EndDrawing();
     }
 
-    FreeButtons();
+    UnloadButtons();
 
     UnloadMusic();
 

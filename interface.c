@@ -1,12 +1,12 @@
-#include <stdio.h>
 #include <stdlib.h>
-#include <string.h>
+#include <string.h> // for setting up the text in the buttons
 #include "raylib.h"
 #include "config.h"
 #include "interface.h"
 #include "buttons.h"
 
-#define FONT_SIZE SCREEN_WIDTH/70
+#define FONT_SIZE SCREEN_WIDTH/20
+#define BUTTON_FONT_SIZE SCREEN_WIDTH/70
 #define TEXT_PADDING SCREEN_WIDTH/192
 
 #define DEFAULT_BUTTON_COLOR GREEN
@@ -16,20 +16,28 @@ Button *button_list = NULL;
 int button_count = 0;
 
 void DrawPauseMenu() {
-    // DrawTexture(pause_bg, SCREEN_WIDTH/2 - pause_bg.width/2, SCREEN_HEIGHT/2 - pause_bg.height/2, RAYWHITE);
     DrawRectangleRec((Rectangle){0, 0, SCREEN_WIDTH, SCREEN_WIDTH}, (Color){0, 0, 0, 90}); // Dim screen
-    DrawText("GAME PAUSED", SCREEN_WIDTH/2 - 98, SCREEN_HEIGHT/2 - 190, 30, WHITE);
+    DrawText("GAME PAUSED", SCREEN_WIDTH/2 - MeasureText("GAME PAUSED", BUTTON_FONT_SIZE)/2, 3*SCREEN_HEIGHT/8, BUTTON_FONT_SIZE, WHITE); // pls don't change this :)
     DrawButtons();
     PressButton();
+}
+
+void DrawEndScreen() {
+    if (game_state == Win) {
+        DrawText("You Win", SCREEN_WIDTH/2 - MeasureText("You Win", FONT_SIZE), SCREEN_HEIGHT/2 + FONT_SIZE/2, FONT_SIZE, GREEN);
+    }
+    else if (game_state == Lose) {
+        DrawText("Game Over", SCREEN_WIDTH/2 - MeasureText("Game Over", FONT_SIZE)/2, SCREEN_HEIGHT/2 - FONT_SIZE/2, FONT_SIZE, RED);
+    }
 }
 
 void InitButton(int pos_x, int pos_y, int width, int height, char *text, Color color, Function function) {
     Button button = {0};
 
-    // DEFINE WIDTH AND HEIGHT FIRST
-    button.width = (width) ? width : MeasureText(text, FONT_SIZE) + TEXT_PADDING * 2; // if the width is not 0 use it otherwise use text length
-    button.height = (height) ? height : FONT_SIZE + TEXT_PADDING * 2; // same as last line
-    // BECUASE YOU NEED TO USE THEM HERE
+    // define width and height first -
+    button.width = (width) ? width : MeasureText(text, BUTTON_FONT_SIZE) + TEXT_PADDING * 2; // if the width is not 0 use it otherwise use text length
+    button.height = (height) ? height : BUTTON_FONT_SIZE + TEXT_PADDING * 2; // same as last line
+    // - because you need to use them here
     button.pos_x = pos_x - button.width/2; // use center of button as base for location
     button.pos_y = pos_y - button.height/2; // (instead of the top right corner)
     button.text = strdup(text);
@@ -62,7 +70,7 @@ void DrawButtons() {
                 button_list[i].width,
                 button_list[i].height},
                 button_list[i].color);
-        DrawText(button_list[i].text, button_list[i].pos_x + TEXT_PADDING, button_list[i].pos_y + TEXT_PADDING, FONT_SIZE, WHITE);
+        DrawText(button_list[i].text, button_list[i].pos_x + TEXT_PADDING, button_list[i].pos_y + TEXT_PADDING, BUTTON_FONT_SIZE, WHITE);
     }
 }
 
@@ -88,6 +96,6 @@ void PressButton() {
     }
 }
 
-void FreeButtons() {
+void UnloadButtons() {
     free(button_list);
 }

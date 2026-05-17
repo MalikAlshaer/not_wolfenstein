@@ -18,6 +18,8 @@ typedef struct Button{
 
 void DrawPauseMenu();
 
+void DrawEndScreen();
+
 void InitButton(int pos_x, int pos_y, int width, int height, char *text, Color color, Function function);
 
 void DefineButtons();
@@ -26,6 +28,6 @@ void DrawButtons();
 
 void PressButton();
 
-void FreeButtons();
+void UnloadButtons();
 
 #endif
