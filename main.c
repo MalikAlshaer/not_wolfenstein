@@ -3,13 +3,15 @@
 #include "config.h"
 #include "interface.h"
 
+#define FPS 60
+
 #define CELL_SIZE 50
 #define PLAYER_FOV 80
 
 #define RENDER_DISTANCE 500
 
-#define MAP_HEIGHT 30
-#define MAP_WIDTH 30
+#define MAP_HEIGHT 13
+#define MAP_WIDTH 13
 
 #define RAY_STEP PLAYER_FOV/SCREEN_WIDTH
 #define RAY_STEP_SIZE 0.7
@@ -17,48 +19,34 @@
 #define PLAYER_MOVEMENT_SPEED 1
 
 int map[MAP_HEIGHT][MAP_WIDTH] = {
-    {1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1},
-    {1,0,1,4,4,4,4,4,1,0,0,0,1,0,0,1,1,0,0,0,1,0,1,1,1,1,0,0,0,1},
-    {1,4,1,4,1,1,1,4,1,0,1,1,1,0,1,1,1,0,1,0,1,0,0,0,0,1,0,1,0,1},
-    {1,4,1,4,1,1,1,4,1,0,1,0,1,0,1,1,1,0,1,0,1,1,1,1,0,1,0,1,0,1},
-    {1,4,1,4,1,4,4,4,1,0,1,0,0,0,0,0,0,0,0,0,1,0,0,0,0,1,0,1,0,1},
-    {1,4,4,4,1,4,1,1,1,0,1,1,1,1,1,0,1,1,1,1,1,0,1,0,1,1,0,1,0,1},
-    {1,0,1,1,1,4,1,1,1,0,0,0,0,1,0,0,1,0,0,0,0,0,1,0,1,0,0,1,0,1},
-    {1,0,1,0,1,4,4,4,1,0,1,1,0,0,0,1,1,0,1,0,1,1,1,0,0,0,1,1,0,1},
-    {1,0,1,0,1,1,1,4,1,0,0,1,0,1,1,1,0,0,1,0,1,0,1,1,1,1,1,0,0,1},
-    {1,0,0,0,1,4,4,4,1,0,0,1,0,0,0,1,0,1,1,1,1,0,0,0,1,0,1,1,1,1},
-    {1,0,1,1,1,4,1,1,1,1,1,1,0,1,0,1,0,1,0,0,1,0,1,0,0,0,0,0,0,1},
-    {1,0,1,4,4,4,1,0,0,0,0,1,0,1,0,0,0,1,0,0,1,0,1,0,1,0,1,0,1,1},
-    {1,0,1,4,1,1,1,0,1,1,0,1,0,1,0,1,1,1,0,0,0,0,1,1,1,1,1,0,1,1},
-    {1,1,1,4,1,0,0,0,1,1,0,0,0,1,4,4,4,1,1,1,1,1,1,0,0,0,0,0,0,1},
-    {1,4,4,4,1,0,0,0,1,1,1,1,1,1,4,1,4,4,4,4,0,0,0,0,1,1,1,0,0,1},
-    {1,4,1,1,1,1,0,0,0,1,4,4,4,1,4,1,1,1,1,4,1,1,1,1,1,0,1,0,1,1},
-    {1,4,4,4,4,1,1,1,1,1,4,1,4,1,4,1,0,0,1,4,1,1,0,0,0,0,0,0,1,1},
-    {1,1,1,1,4,4,4,1,1,4,4,1,4,4,4,1,0,0,1,4,4,1,1,0,1,1,1,1,1,1},
-    {1,0,1,1,1,1,4,1,1,4,1,1,1,1,1,1,1,0,1,1,4,4,1,0,1,0,0,0,0,1},
-    {1,0,0,4,4,4,4,1,1,4,1,0,0,0,0,0,0,0,0,1,1,4,1,0,1,1,1,1,0,1},
-    {1,0,1,4,1,1,1,1,1,4,1,0,1,0,1,0,1,1,0,0,1,4,1,0,1,0,0,0,0,1},
-    {1,0,1,4,4,4,4,1,1,4,1,0,1,0,1,0,1,1,0,1,1,4,1,0,1,0,1,0,0,1},
-    {1,0,1,1,1,1,4,1,1,4,1,0,1,0,1,1,1,1,1,1,4,4,1,0,0,0,1,1,0,1},
-    {1,0,1,0,0,1,4,4,4,4,1,0,1,0,1,4,4,4,4,4,4,1,1,1,1,1,1,1,0,1},
-    {1,0,1,0,1,1,1,1,1,1,1,0,1,0,1,4,1,1,1,1,1,1,1,4,4,4,4,1,0,1},
-    {1,0,1,0,0,0,0,0,0,1,1,0,1,0,1,4,1,1,4,4,4,4,4,4,1,1,4,1,1,1},
-    {1,0,1,0,0,1,0,1,0,1,1,0,1,0,1,4,4,1,4,1,1,1,1,1,1,1,4,4,1,1},
-    {1,0,1,1,1,1,0,1,0,1,1,1,1,0,1,1,4,4,4,1,0,0,0,0,0,1,1,4,1,1},
-    {1,0,0,0,0,0,0,1,0,0,0,0,0,0,0,1,1,1,1,1,0,0,0,0,0,0,1,4,4,1},
-    {1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1},
+    {1,1,1,1,1,1,1,1,1,1,1,1,1},
+    {1,4,4,4,4,4,4,4,4,4,4,0,1},
+    {1,0,1,1,0,1,0,1,1,1,4,1,1},
+    {1,0,1,0,0,0,0,0,0,0,4,4,1},
+    {1,0,1,1,0,1,0,1,1,1,1,4,1},
+    {1,0,0,0,0,1,0,0,0,0,0,4,1},
+    {1,0,1,1,1,1,0,1,0,1,1,4,1},
+    {1,0,1,0,1,0,0,0,0,0,1,4,1},
+    {1,0,1,0,1,0,0,0,0,0,1,4,1},
+    {1,1,1,0,1,0,1,1,0,0,1,4,1},
+    {1,0,0,0,0,0,0,0,0,0,1,4,1},
+    {1,0,0,1,0,0,0,0,0,0,1,4,1},
+    {1,1,1,1,1,1,1,1,1,1,1,0,1}
+    //in order to represent the game i created a simple map
+    //4 refers to truth way
 };
 
 typedef struct Player {
-    double x;
-    double y;
-    double angle;
-    int hp;
+    double x;       // x coordinate of the player
+    double y;       // y coordinate of the player
+    double angle;   // direction the player is facing
+    int hp;         // health points
+    float counter;  // time left for the player to exit
 } Player;
 
 //               x    y    deg hp
-// Player player = {75, 125, 90, 120};
-Player player = {100, 100, 90, 120};
+ Player player = {75, 125, 90, 120, 60};
+//Player player = {100, 100, 90, 120};
 
 // returns the distance to next wall assuming the player looks in given direction
 double GetDistance(double angle) {
@@ -111,9 +99,9 @@ void DrawHud(){
     // DrawText("to sprint keep ctrl",SCREEN_WIDTH/2-95,49,20,WHITE);
 
     //coords
-    DrawText(TextFormat("x:%.2f y:%.2f", player.x, player.y), 10, 10, 20, BLUE);
-
-
+    DrawText(TextFormat("x: %.2f y: %.2f", player.x, player.y), 10, 10, 20, BLUE);
+    DrawText(TextFormat("remaining: %.1f s", player.counter), 10, 60, 20, RED);
+    player.counter -=0.02;
 
     // crosshair
     int crosshair_length = 10, crosshair_width = 3, crosshair_separation = 10;
@@ -170,17 +158,17 @@ void DrawHud(){
     //             DrawRectangle(SCREEN_WIDTH - 140 + a * 10, 50 + b * 10, 10, 10, WHITE);
     //         }
     //     }
-    // }
+ 
 
     // DrawRectangle(mini_point_x - icon, mini_point_y,10,10,GREEN);
-    // DrawText("mini map",SCREEN_WIDTH - 122,145,25,WHITE);
+     //DrawText("mini map",SCREEN_WIDTH - 122,145,25,WHITE);
 }
 
 //draws a vertical line centered around the horizontal center axis of window
 void DrawVerticalLine(double height, double x, double distance){
     int wall_slice = (int)x % wall_texture.width + player.angle;
-
-    // Rectangle vertical_slice = {wall_slice, 0, 1, 800};
+    
+     //Rectangle vertical_slice = {wall_slice, 0, 1, 800};
     Rectangle vertical_rect = {x, SCREEN_HEIGHT/2.0 - height/2.0, 1, height};
 
     int intensity = 255 - ((distance / RENDER_DISTANCE) * 255);
@@ -188,7 +176,7 @@ void DrawVerticalLine(double height, double x, double distance){
     if (intensity > 255) intensity = 255;
 
    //you can change {red, green, blue, transparency}
-    Color wall_color = {130, 130, 130, intensity};
+    Color wall_color = {130, 130, 0, intensity};
 
     DrawRectangleRec(vertical_rect, wall_color);
     // DrawTexturePro(wall_texture, vertical_slice, vertical_rect, (Vector2){0, 0}, 0.0, wall_color);
@@ -277,12 +265,16 @@ void move(){
     }
 }
 
-void ToggleMusic(int music_bool, Music *music){
-    if (music_bool) { ResumeMusicStream(*music); }
-    else { PauseMusicStream(*music); }
+void EndOfGame(){
+    if(player.x >550 && player.x <600 && player.y >550 && player.y <600){
+        game_state = Win;    
+    }
+    if(player.counter <= 0 || player.hp <= 0){
+        game_state = Lose;
+    }
 }
 
-int main(void) {
+void RunGame() {
     SetTargetFPS(FPS);
     InitWindow(SCREEN_WIDTH, SCREEN_HEIGHT, "not_wolfenstein.exe");
     DefineButtons(); // visual stuff from our interface library
@@ -301,33 +293,48 @@ int main(void) {
         UpdateMusicStream(game_music);
 
         // pause game
-        if (IsKeyPressed(KEY_E)) {
-            PauseGame();
+        if(game_state == Play || game_state == Pause){
+            if (IsKeyPressed(KEY_E)) {
+                PauseGame();
+            }
+
+            DrawFOV();
+
+            if (game_state == Play) {
+                move();
+                DrawHud();
+                EndOfGame();
+            }
+
+            else if (game_state == Pause) {
+                DrawPauseMenu();
+            }
         }
 
-        DrawFOV();
+        // else if(game_state == Win){
+        //     DrawRectangle(SCREEN_WIDTH/4,SCREEN_HEIGHT/4,SCREEN_WIDTH/2,SCREEN_HEIGHT/2,RED);
+        //     DrawText("You Win",SCREEN_WIDTH/4+200,SCREEN_HEIGHT/4+100,50,BLUE);
+        // }
 
-        if (!game_paused) {
-            move();
-            DrawHud();
-        }
-
-        else if (game_paused) {
-            DrawPauseMenu();
-        }
+        // else if(game_state == Lose){
+        //     DrawRectangle(SCREEN_WIDTH/4,SCREEN_HEIGHT/4,SCREEN_WIDTH/2,SCREEN_HEIGHT/2,RED);
+        //     DrawText("You Lost",SCREEN_WIDTH/4+200,SCREEN_HEIGHT/4+100,50,BLUE);
+        // }
 
         EndDrawing();
     }
 
     FreeButtons();
 
-    UnloadTexture(pause_bg);
-    UnloadTexture(wall_texture);
+    UnloadMusic();
 
-    // UnloadMusicStream(pause_music);
-    UnloadMusicStream(game_music);
+    UnloadTextures();
 
     CloseAudioDevice();
     CloseWindow();
+}
+
+int main(void) {
+    RunGame();
     return 0;
 }
