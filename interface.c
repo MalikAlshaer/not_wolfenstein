@@ -9,7 +9,7 @@
 #define BUTTON_FONT_SIZE SCREEN_WIDTH/70
 #define TEXT_PADDING SCREEN_WIDTH/192
 
-#define DEFAULT_BUTTON_COLOR GREEN
+#define DEFAULT_BUTTON_COLOR BLUE
 #define HOVER_BUTTON_COLOR GRAY
 
 Button *button_list = NULL;
@@ -56,8 +56,9 @@ void InitButton(int pos_x, int pos_y, int width, int height, char *text, Color c
 
 void DefineButtons() {
     InitButton(20 * SCREEN_WIDTH/40,     8 * SCREEN_HEIGHT/20,  0,  0, "RESUME",    DEFAULT_BUTTON_COLOR, PauseGame); // resume
-    InitButton(20 * SCREEN_WIDTH/41,    10 * SCREEN_HEIGHT/20,  0,  0, "-",         DEFAULT_BUTTON_COLOR, DecMouseSens);
-    InitButton(21 * SCREEN_WIDTH/41,    10 * SCREEN_HEIGHT/20,  0,  0, "+",         DEFAULT_BUTTON_COLOR, IncMouseSens);
+    InitButton(19 * SCREEN_WIDTH/42,    10 * SCREEN_HEIGHT/20,  0,  0, "-",         DEFAULT_BUTTON_COLOR, DecMouseSens); // dec mouse sensitivity
+    InitButton(23 * SCREEN_WIDTH/42,    10 * SCREEN_HEIGHT/20,  0,  0, "+",         DEFAULT_BUTTON_COLOR, IncMouseSens); // inc mouse sensitivity
+    InitButton(20 * SCREEN_WIDTH/40,    10 * SCREEN_HEIGHT/20,  0,  0, "MOUSE",     DEFAULT_BUTTON_COLOR, DoNothing); // button with no funcion
     InitButton(20 * SCREEN_WIDTH/40,    12 * SCREEN_HEIGHT/20,  0,  0, "MUSIC",     DEFAULT_BUTTON_COLOR, MusicOnOff); // toggle music
     InitButton(18 * SCREEN_WIDTH/40,    12 * SCREEN_HEIGHT/20,  0,  0, "-",         DEFAULT_BUTTON_COLOR, DecMusicVolume); // dec music
     InitButton(22 * SCREEN_WIDTH/40,    12 * SCREEN_HEIGHT/20,  0,  0, "+",         DEFAULT_BUTTON_COLOR, IncMusicVolume); // inc music
