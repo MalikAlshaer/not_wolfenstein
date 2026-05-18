@@ -1,4 +1,4 @@
-#include "config.h"
+#include "common.h"
 #include "raylib.h"
 
 #define VOLUME_STEP 0.1f

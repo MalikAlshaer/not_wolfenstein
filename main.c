@@ -1,6 +1,6 @@
 #include <math.h>
 #include "raylib.h"
-#include "config.h"
+#include "common.h"
 #include "interface.h"
 
 #define FPS 60

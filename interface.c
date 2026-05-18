@@ -1,7 +1,7 @@
 #include <stdlib.h>
 #include <string.h> // for setting up the text in the buttons
 #include "raylib.h"
-#include "config.h"
+#include "common.h"
 #include "interface.h"
 #include "buttons.h"
 

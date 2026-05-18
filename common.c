@@ -1,5 +1,5 @@
 #include "raylib.h"
-#include "config.h"
+#include "common.h"
 
 GameState game_state;
 

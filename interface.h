@@ -1,6 +1,6 @@
 #ifndef PAUSE_H_
 #define PAUSE_H_
-#include "config.h"
+#include "common.h"
 #include "raylib.h"
 
 // understand this
