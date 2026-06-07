@@ -32,7 +32,7 @@ void DrawEndScreen() {
     }
 }
 
-void InitButton(int pos_x, int pos_y, int width, int height, char *text, Color color, Function function) {
+void InitButton(int pos_x, int pos_y, int width, int height, char *text, Color color, void (*function)(void)) {
     Button button = {0};
 
     // define width and height first -
